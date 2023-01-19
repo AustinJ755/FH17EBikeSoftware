@@ -477,4 +477,5 @@
 		<project id="empty_driverlib_project.com.ti.ccstudio.buildDefinitions.C2000.ProjectType.464147007" name="C2000" projectType="com.ti.ccstudio.buildDefinitions.C2000.ProjectType"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration"/>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>
