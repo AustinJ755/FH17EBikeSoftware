@@ -49,13 +49,174 @@
 //
 #include "driverlib.h"
 #include "device.h"
+#include "board.h"
+#include "./displayDriver/ili9341.h"
 
 //
 // Main
 //
+
+uint16_t pixels[160];
 void main(void)
 {
-    //examples
+
+    //
+    // Initialize device clock and peripherals
+    //
+    Device_init();
+
+    //
+    // Disable pin locks and enable internal pullups.
+    //
+    Device_initGPIO();
+
+    //
+    // Initialize PIE and clear PIE registers. Disables CPU interrupts.
+    //
+    Interrupt_initModule();
+
+    //
+    // Initialize the PIE vector table with pointers to the shell Interrupt
+    // Service Routines (ISR).
+    //
+    Interrupt_initVectorTable();
+
+
+    Board_init();
+
+    EINT;
+    ERTM;
+    init_ili9341();
+    uint32_t test=0;
+    for(test=0;test<800000;test++){
+
+    }
+    ili9341_exitSleep();
+    for(test=0;test<8000000;test++){
+
+    }
+    ili9341_NOP();
+    ili9341_readDisplayIDInfo(0);
+    uint32_t display_info;
+    ili9341_readDisplayStatus(&display_info);
+//    uint8_t ctrl_val = 0x24;
+//    ili9341_writeCTRLDisplay(ctrl_val);
+//    ili9341_readCTRLDisplay(&ctrl_val);
+//    uint8_t brightness = 0x50;
+//    ili9341_writeDisplayBrightness(0x45);
+//    ili9341_readDisplayBrightness(&brightness);
+    for(test=0;test<800000;test++){
+
+    }
+    //ili9341_memoryAccessControl(0x20);
+    ili9341_COLMODPixelFormatSet(0x55);
+    ili9341_memoryAccessControl(0x08);
+    ili9341_displayOn();
+    for(test=0;test<160;test++){
+        pixels[test]=0x87f0;
+    }
+    ili9341_writeFrameMemory(pixels, 160);
+    while(!DMAComplete());
+    for(test=0;test<29;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+
+    for(test=0;test<160;test++){
+        pixels[test]=0xf410;
+    }
+    for(test=0;test<30;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+
+//    for(test=0;test<160;test++){
+//        pixels[test]=0xf402;
+//    }
+//    for(test=0;test<30;test++){
+//        ili9341_writeMemoryContinue(pixels, 160);
+//    }
+//
+//    for(test=0;test<160;test++){
+//        pixels[test]=0x19bf;
+//    }
+//    for(test=0;test<30;test++){
+//        ili9341_writeMemoryContinue(pixels, 160);
+//    }
+//
+//    for(test=0;test<160;test++){
+//        pixels[test]=0x19a0;
+//    }
+//    for(test=0;test<30;test++){
+//        ili9341_writeMemoryContinue(pixels, 160);
+//    }
+//
+//    for(test=0;test<160;test++){
+//        pixels[test]=0x1800;
+//    }
+//    for(test=0;test<30;test++){
+//        ili9341_writeMemoryContinue(pixels, 160);
+//    }
+
+//    for(test=0;test<160;test++){
+//        pixels[test]=0x1f40;
+//    }
+//    for(test=0;test<30;test++){
+//        ili9341_writeMemoryContinue(pixels, 160);
+//    }
+//
+//    for(test=0;test<160;test++){
+//        pixels[test]=0xd80e;
+//    }
+//    for(test=0;test<30;test++){
+//        ili9341_writeMemoryContinue(pixels, 160);
+//    }
+
+    for(test=0;test<160;test++){
+        pixels[test]=0xD938;
+    }
+    for(test=0;test<30;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+
+    for(test=0;test<160;test++){
+        pixels[test]=0xF800;
+    }
+    for(test=0;test<90;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+    for(test=0;test<160;test++){
+        pixels[test]=0x07E0;
+    }
+    for(test=0;test<90;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+    for(test=0;test<160;test++){
+        pixels[test]=0x0760;
+    }
+    for(test=0;test<90;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+    for(test=0;test<160;test++){
+        pixels[test]=0x03E0;
+    }
+    for(test=0;test<90;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+    for(test=0;test<160;test++){
+        pixels[test]=0x001F;
+    }
+    for(test=0;test<90;test++){
+        ili9341_writeMemoryContinue(pixels, 160);
+        while(0==DMAComplete());
+    }
+
+
 }
 
 //

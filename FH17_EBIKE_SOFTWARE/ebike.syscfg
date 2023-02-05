@@ -1,0 +1,77 @@
+/**
+ * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
+ * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
+ * @cliArgs --board "/LAUNCHXL_F280049C" --context "system" --product "C2000WARE@4.02.00.00"
+ * @versions {"tool":"1.14.0+2667"}
+ */
+
+/**
+ * Import the modules used in this configuration.
+ */
+const gpio  = scripting.addModule("/driverlib/gpio.js", {}, false);
+const gpio1 = gpio.addInstance();
+const gpio2 = gpio.addInstance();
+const sci   = scripting.addModule("/driverlib/sci.js", {}, false);
+const sci1  = sci.addInstance();
+const spi   = scripting.addModule("/driverlib/spi.js", {}, false);
+const spi1  = spi.addInstance();
+
+/**
+ * Write custom configuration values to the imported modules.
+ */
+gpio1.direction         = "GPIO_DIR_MODE_OUT";
+gpio1.writeInitialValue = true;
+gpio1.initialValue      = 1;
+gpio1.$name             = "ILI9341_GPIO_CS";
+gpio1.gpioPin.$assign   = "boosterpack1.39";
+scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EPWM6 BP on the LaunchPad F280049C\\. Consider selecting it in 'use hardware' above\\. @@@.+?@@@", gpio1, "gpioPin");
+
+gpio2.direction         = "GPIO_DIR_MODE_OUT";
+gpio2.writeInitialValue = true;
+gpio2.$name             = "ILI9341_GPIO_DCX";
+gpio2.gpioPin.$assign   = "boosterpack1.13";
+
+sci1.$hardware                = system.deviceData.board.components.XDS_UART.subComponents.XDS_SCI_INST1;
+sci1.enabledFIFOInterrupts    = ["SCI_INT_RXFF"];
+sci1.rxFifo                   = "SCI_FIFO_RX1";
+sci1.$name                    = "DATA_LOG_UART";
+sci1.registerInterrupts       = true;
+sci1.sciRXInt.enableInterrupt = true;
+
+spi1.$name                           = "Ili9341_SPI";
+spi1.emulationMode                   = "SPI_EMULATION_STOP_AFTER_TRANSMIT";
+spi1.bitRate                         = 1000000;
+spi1.useDMATX                        = true;
+spi1.mode                            = "SPI_MODE_MASTER";
+spi1.$hardware                       = system.deviceData.board.components.BP_SITE_1.subComponents.SPI;
+spi1.rxFifo                          = "SPI_FIFO_RX8";
+spi1.transferProtocol                = "SPI_PROT_POL0PHA1";
+spi1.enabledFIFOInterrupts           = ["SPI_INT_RXFF","SPI_INT_TXFF"];
+spi1.txFifo                          = "SPI_FIFO_TX0";
+spi1.spiTXDMA.databusWidthConfig     = scripting.forceWrite("DMA_CFG_SIZE_16BIT");
+spi1.spiTXDMA.enableTriggers         = true;
+spi1.spiTXDMA.useInterrupts          = true;
+spi1.spiTXDMA.registerInterrupts     = true;
+spi1.spiTXDMA.enableInterrupts       = true;
+spi1.spiTXDMA.interruptMode          = "DMA_INT_AT_END";
+spi1.spiTXDMA.transferSize           = 16;
+spi1.spiTXDMA.srcAddressInputMode    = "VARIABLE";
+spi1.spiTXDMA.srcBurstStep           = 1;
+spi1.spiTXDMA.srcTransferStep        = 1;
+spi1.spiTXDMA.srcAddressVariable     = "ili9341_dma_src_address";
+spi1.spiTXDMA.burstSize              = 8;
+spi1.spiTXDMA.dmaInt.enableInterrupt = true;
+spi1.spi.$assign                     = "SPIA";
+
+/**
+ * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
+ * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
+ * re-solve from scratch.
+ */
+sci1.sci.$suggestSolution             = "SCIA";
+sci1.sci.sci_rxPin.$suggestSolution   = "boosterpack2.43";
+sci1.sci.sci_txPin.$suggestSolution   = "boosterpack2.44";
+spi1.spi.spi_simoPin.$suggestSolution = "boosterpack1.15";
+spi1.spi.spi_somiPin.$suggestSolution = "boosterpack1.14";
+spi1.spi.spi_clkPin.$suggestSolution  = "boosterpack1.7";
+spi1.spi.spi_stePin.$suggestSolution  = "boosterpack1.19";

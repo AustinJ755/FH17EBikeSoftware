@@ -1,0 +1,20 @@
+/*
+ * datalogger.h
+ *
+ *  Created on: Feb 4, 2023
+ *      Author: aj755
+ */
+
+#ifndef DATALOGGER_DATALOGGER_H_
+#define DATALOGGER_DATALOGGER_H_
+
+//
+
+#define MESSAGE_STRING_MASK             0x00000000
+#define MESSAGE_FLOAT_MASK              0x80000000
+#define MESSAGE_INTEGER_MASK            0x40000000
+#define MESSAGE_INTEGER_IMMEDIATE_MASK  0x20000000
+#define MESSAGE_FLOAT_IMMEDIATE_MASK    0x10000000
+
+
+#endif /* DATALOGGER_DATALOGGER_H_ */
