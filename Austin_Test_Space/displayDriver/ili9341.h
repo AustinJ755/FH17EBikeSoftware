@@ -67,12 +67,15 @@
 
 
 
-//SPI DMA RAM
-#define SPIBUFFERSIZE 80*80 //gcd of 240,320
+#define SPI_CS_GPIO ILI9341_GPIO_CS
+#define SPI_DX_GPIO ILI9341_GPIO_DCX
+#define CS_LOW                      GPIO_writePin(SPI_CS_GPIO, 0)
+#define CS_HIGH                     GPIO_writePin(SPI_CS_GPIO, 1)
+#define DCX_COMMAND                 GPIO_writePin(SPI_DX_GPIO, 0)
+#define DCX_DATA                    GPIO_writePin(SPI_DX_GPIO, 1)
 
-extern uint16_t SPI_DMA_BUFFER_1[SPIBUFFERSIZE];
 
-extern uint16_t SPI_DMA_BUFFER_2[SPIBUFFERSIZE];
+
 
 
 //We will have two buffers this will allow us to read from the sd card and write to the display
@@ -140,8 +143,6 @@ int ili9341_readDisplaySelfDiagnosticReport(uint8_t* diagnostic_report);
  * @return SPI_STATUS_CODE
  */
 int ili9341_enterSleep(void);
-
-uint8_t DMAComplete(void);
 /**
  * Will force the display to exit sleep mode
  * MUST WAIT 5MS BEFORE SENDING ANYMORE COMMANDS TO THE DISPLAY
@@ -173,7 +174,7 @@ int ili9341_setRowAddress(uint16_t start_row, uint16_t end_row);
  * @param pixel_data
  * @return
  */
-int ili9341_writeFrameMemory(uint16_t* pixel_data, uint16_t data_length);
+int ili9341_startWriteFrameMemory(void);//uint16_t* pixel_data, uint16_t data_length);
 
 /**
  *
@@ -188,7 +189,7 @@ int ili9341_colorSet(uint8_t* color_set);
  * @param storage_location
  * @return
  */
-int ili9341_readFrameMemory(uint16_t* storage_location , uint16_t data_length);
+int ili9341_startReadFrameMemory(void);//uint16_t* storage_location , uint16_t data_length);
 
 int ili9341_partialArea(uint16_t start_row, uint16_t end_row);
 
@@ -208,9 +209,9 @@ int ili9341_IdleModeOn(void);
 
 int ili9341_COLMODPixelFormatSet(uint8_t pxl_frmt);
 
-int ili9341_writeMemoryContinue(uint16_t* pixel_data, uint16_t data_length);
+int ili9341_writeMemoryContinue(void);//uint16_t* pixel_data, uint16_t data_length);
 
-int ili9341_readMemoryContinue(uint16_t* storage_location);
+int ili9341_readMemoryContinue(void);//uint16_t* storage_location);
 
 int ili9341_writeDisplayBrightness(uint8_t brightness_value);
 

@@ -51,12 +51,16 @@
 #include "device.h"
 #include "board.h"
 #include "./displayDriver/ili9341.h"
-
+#include "datalogger/datalogger.h"
+#include "displayDriver/display_driver.h"
 //
 // Main
 //
-
-uint16_t pixels[160];
+char test_string[] = "hello";
+uint32_t test = 100;
+int32_t test2 = -5;
+float test3 = 1.5f;
+uint16_t pixels[120];
 void main(void)
 {
 
@@ -84,8 +88,22 @@ void main(void)
 
     Board_init();
 
+
+
     EINT;
     ERTM;
+
+    logString(test_string);
+    logSignedInt(&test2);
+    logUInt(&test);
+    logFloat(&test3);
+    logUIntImmediate(test);
+    logSignedIntImmediate(test2);
+
+    checkDebugMessageQueue();
+
+
+
     init_ili9341();
     uint32_t test=0;
     for(test=0;test<800000;test++){
@@ -112,110 +130,80 @@ void main(void)
     ili9341_COLMODPixelFormatSet(0x55);
     ili9341_memoryAccessControl(0x08);
     ili9341_displayOn();
-    for(test=0;test<160;test++){
-        pixels[test]=0x87f0;
-    }
-    ili9341_writeFrameMemory(pixels, 160);
-    while(!DMAComplete());
-    for(test=0;test<29;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
+    for(test=0;test<800000;test++){
 
-    for(test=0;test<160;test++){
-        pixels[test]=0xf410;
     }
-    for(test=0;test<30;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
-
-//    for(test=0;test<160;test++){
-//        pixels[test]=0xf402;
+    drawFilledColorBox(0, 0, 239, 319, 0xD938);
+    drawFilledColorBox(0, 0, 239, 319, 0x87f0);
+    drawFilledColorBox(0, 0, 239, 319, 0xF800);
+    drawFilledColorBox(10, 10, 10,10, 0x87f0);
+    drawFilledColorBox(60, 60, 10,10, 0x87f0);
+    drawFilledColorBox(100, 150, 10,10, 0x87f0);
+    drawFilledColorBox(300, 200, 10,10, 0x87f0);
+    checkDisplayCommandFifo();
+//    for(test=0;test<120;test++){
+//        pixels[test]=0x87f0;
 //    }
-//    for(test=0;test<30;test++){
-//        ili9341_writeMemoryContinue(pixels, 160);
+//    ili9341_writeFrameMemory(pixels, 120);
+//    while(!DMAComplete());
+//    for(test=0;test<29;test++){
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
 //    }
 //
-//    for(test=0;test<160;test++){
-//        pixels[test]=0x19bf;
+//    for(test=0;test<120;test++){
+//        pixels[test]=0xf410;
 //    }
 //    for(test=0;test<30;test++){
-//        ili9341_writeMemoryContinue(pixels, 160);
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
 //    }
 //
-//    for(test=0;test<160;test++){
-//        pixels[test]=0x19a0;
+//    for(test=0;test<120;test++){
+//        pixels[test]=0xD938;
 //    }
 //    for(test=0;test<30;test++){
-//        ili9341_writeMemoryContinue(pixels, 160);
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
 //    }
 //
-//    for(test=0;test<160;test++){
-//        pixels[test]=0x1800;
+//    for(test=0;test<120;test++){
+//        pixels[test]=0xF800;
 //    }
-//    for(test=0;test<30;test++){
-//        ili9341_writeMemoryContinue(pixels, 160);
+//    for(test=0;test<90;test++){
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
 //    }
-
-//    for(test=0;test<160;test++){
-//        pixels[test]=0x1f40;
+//    for(test=0;test<120;test++){
+//        pixels[test]=0x07E0;
 //    }
-//    for(test=0;test<30;test++){
-//        ili9341_writeMemoryContinue(pixels, 160);
+//    for(test=0;test<90;test++){
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
 //    }
-//
-//    for(test=0;test<160;test++){
-//        pixels[test]=0xd80e;
+//    for(test=0;test<120;test++){
+//        pixels[test]=0x0760;
 //    }
-//    for(test=0;test<30;test++){
-//        ili9341_writeMemoryContinue(pixels, 160);
+//    for(test=0;test<90;test++){
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
 //    }
-
-    for(test=0;test<160;test++){
-        pixels[test]=0xD938;
+//    for(test=0;test<120;test++){
+//        pixels[test]=0x03E0;
+//    }
+//    for(test=0;test<90;test++){
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
+//    }
+//    for(test=0;test<120;test++){
+//        pixels[test]=0x001F;
+//    }
+//    for(test=0;test<90;test++){
+//        ili9341_writeMemoryContinue(pixels, 120);
+//        while(0==DMAComplete());
+//    }
+    for(;;){
     }
-    for(test=0;test<30;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
-
-    for(test=0;test<160;test++){
-        pixels[test]=0xF800;
-    }
-    for(test=0;test<90;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
-    for(test=0;test<160;test++){
-        pixels[test]=0x07E0;
-    }
-    for(test=0;test<90;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
-    for(test=0;test<160;test++){
-        pixels[test]=0x0760;
-    }
-    for(test=0;test<90;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
-    for(test=0;test<160;test++){
-        pixels[test]=0x03E0;
-    }
-    for(test=0;test<90;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
-    for(test=0;test<160;test++){
-        pixels[test]=0x001F;
-    }
-    for(test=0;test<90;test++){
-        ili9341_writeMemoryContinue(pixels, 160);
-        while(0==DMAComplete());
-    }
-
 
 }
 

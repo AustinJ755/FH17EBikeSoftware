@@ -31,12 +31,10 @@ gpio2.writeInitialValue = true;
 gpio2.$name             = "ILI9341_GPIO_DCX";
 gpio2.gpioPin.$assign   = "boosterpack1.13";
 
-sci1.$hardware                = system.deviceData.board.components.XDS_UART.subComponents.XDS_SCI_INST1;
-sci1.enabledFIFOInterrupts    = ["SCI_INT_RXFF"];
-sci1.rxFifo                   = "SCI_FIFO_RX1";
-sci1.$name                    = "DATA_LOG_UART";
-sci1.registerInterrupts       = true;
-sci1.sciRXInt.enableInterrupt = true;
+sci1.$hardware             = system.deviceData.board.components.XDS_UART.subComponents.XDS_SCI_INST1;
+sci1.enabledFIFOInterrupts = ["SCI_INT_RXFF"];
+sci1.rxFifo                = "SCI_FIFO_RX1";
+sci1.$name                 = "DATA_LOG_UART";
 
 spi1.$name                           = "Ili9341_SPI";
 spi1.emulationMode                   = "SPI_EMULATION_STOP_AFTER_TRANSMIT";

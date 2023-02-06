@@ -50,6 +50,7 @@ static inline uint16_t logSignedInt(int32_t* log_int){
 }
 
 //These should maybe not be inlined
+//This num can be at max 28bit
 static inline uint16_t logUIntImmediate(uint32_t log_int){
 
    if(log_int<268435455){
@@ -60,6 +61,7 @@ static inline uint16_t logUIntImmediate(uint32_t log_int){
 }
 
 //This should maybe not be inlined
+//This num can be at max 28bit
 static inline uint16_t logSignedIntImmediate(int32_t log_int){
    if(log_int<-134217728){
 

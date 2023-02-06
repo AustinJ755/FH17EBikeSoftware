@@ -13,126 +13,21 @@ uint8_t initialized = 0;
 
 
 
-//Array for DMA
-uint16_t SPI_DMA_BUFFER_1[SPIBUFFERSIZE];
 
-uint16_t SPI_DMA_BUFFER_2[SPIBUFFERSIZE];
-
-uint8_t transferComplete = 1;
-
-
-
-//We will have two buffers this will allow us to read from the sd card and write to the display
-#pragma DATA_SECTION(SPI_DMA_BUFFER_1, "ramgs0");
-#pragma DATA_SECTION(SPI_DMA_BUFFER_2, "ramgs1");
 
 //void *tx_loc =(void*)SPI_DMA_BUFFER_1;
-const void *ili9341_dma_src_address = (const void *) SPI_DMA_BUFFER_1;
+
 
 #define checkInit if(initialized==0){return ILI9341_ERROR_NOT_INITIALIZED;}
-#define SPI_CS_GPIO ILI9341_GPIO_CS
-#define SPI_DX_GPIO ILI9341_GPIO_DCX
-#define CS_LOW                      GPIO_writePin(SPI_CS_GPIO, 0)
-#define CS_HIGH                     GPIO_writePin(SPI_CS_GPIO, 1)
-#define DCX_COMMAND                 GPIO_writePin(SPI_DX_GPIO, 0)
-#define DCX_DATA                    GPIO_writePin(SPI_DX_GPIO, 1)
+
 #define REVERSE_HOLD32              (((uint32_t)hold[0])<<16)|(((uint32_t)hold[1])<<8)|hold[2]|(hold[3]>>8)
 
 uint16_t hold[4];
 void init_ili9341(void)
 {
-    //All configuration is now done using the board initialization function
-//    //setup the pins
-//    EALLOW;
-//
-////    //Setup SPI MOSI
-////    GPIO_setPinConfig(GPIO_16_SPIA_SIMO);
-////    GPIO_setPadConfig(16, GPIO_PIN_TYPE_STD);
-////    GPIO_setQualificationMode(16, GPIO_QUAL_ASYNC);
-////
-////    //Setup SPI MISO
-////    GPIO_setPinConfig(GPIO_17_SPIA_SOMI);
-////    GPIO_setPadConfig(17, GPIO_PIN_TYPE_STD);
-////    GPIO_setQualificationMode(17, GPIO_QUAL_ASYNC);
-////
-////    //Setup SPI clk
-////    GPIO_setPinConfig(GPIO_56_SPIA_CLK);
-////    GPIO_setPadConfig(56, GPIO_PIN_TYPE_STD);
-////    GPIO_setQualificationMode(56, GPIO_QUAL_ASYNC);
-//
-//    //Setup the CS pin
-//    GPIO_setPinConfig(GPIO_11_GPIO11);
-//    GPIO_setPadConfig(SPI_CS_GPIO, GPIO_PIN_TYPE_STD);
-//    GPIO_setQualificationMode(SPI_CS_GPIO, GPIO_QUAL_SYNC);
-//    GPIO_setDirectionMode(SPI_CS_GPIO, GPIO_DIR_MODE_OUT);
-//    GPIO_setMasterCore(SPI_CS_GPIO, GPIO_CORE_CPU1);
-//
-//    //Setup the Data/Command pin
-//    GPIO_setPinConfig(GPIO_39_GPIO39);
-//    GPIO_setPadConfig(SPI_DX_GPIO, GPIO_PIN_TYPE_STD);
-//    GPIO_setQualificationMode(SPI_DX_GPIO, GPIO_QUAL_SYNC);
-//    GPIO_setDirectionMode(SPI_DX_GPIO, GPIO_DIR_MODE_OUT);
-//    GPIO_setMasterCore(SPI_DX_GPIO, GPIO_CORE_CPU1);
-//
-////    //Setup the actual SPI module with the correct settings
-////    SPI_disableModule(SPIA_BASE);
-////    SPI_setConfig(SPIA_BASE, DEVICE_LSPCLK_FREQ, SPI_PROT_POL0PHA1,
-////                  SPI_MODE_MASTER, 5000000, 8);
-        SPI_disableFIFO(SPIA_BASE);
-////    SPI_disableLoopback(SPIA_BASE);
-////    SPI_setEmulationMode(SPIA_BASE, SPI_EMULATION_STOP_MIDWAY);
-////    SPI_enableModule(SPIA_BASE);
-//    EDIS;
+    SPI_disableFIFO(Ili9341_SPI_BASE);
     initialized = 1;
 }
-
-uint8_t DMAComplete(void){
-    return transferComplete;
-}
-
-
-void sendDataFromDMA(uint8_t starting_command, uint16_t* rgb_data, uint16_t data_length){
-    SPI_setcharLength(Ili9341_SPI_BASE,16);
-    SPI_enableFIFO(Ili9341_SPI_BASE);
-    SPI_setTxFifoTransmitDelay(Ili9341_SPI_BASE,0);
-    DCX_DATA;
-    transferComplete = 0;
-    uint32_t i=0;
-    for(i =0;i<data_length;i++){
-        SPI_DMA_BUFFER_1[i]=rgb_data[i];
-    }
-    DMA_configAddresses(Ili9341_SPI_TX_DMA_BASE, Ili9341_SPI_TX_DMA_ADDRESS, ili9341_dma_src_address);
-    DMA_configTransfer(Ili9341_SPI_TX_DMA_BASE, data_length/8, 1, 0);
-    DMA_startChannel(Ili9341_SPI_TX_DMA_BASE);
-    //DMA_forceTrigger(Ili9341_SPI_TX_DMA_BASE);
-}
-
-
-
-__interrupt void INT_Ili9341_SPI_TX_DMA_ISR(void){
-    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP7);
-    DMA_stopChannel(Ili9341_SPI_TX_DMA_BASE);
-    DEVICE_DELAY_US(1);
-    while(SPI_getTxFIFOStatus(Ili9341_SPI_BASE)!=SPI_FIFO_TX0||SPI_isBusy(Ili9341_SPI_BASE)){
-    }
-    DEVICE_DELAY_US(1);
-    transferComplete = 1;
-    CS_HIGH;
-    SPI_disableFIFO(Ili9341_SPI_BASE);
-    //SPI_readDataNonBlocking(Ili9341_SPI_BASE);
-    return;
-}
-
-
-
-
-
-
-
-
-
-
-
 
 void sendReceiveBytes(uint8_t initial_command, uint16_t *received_data,
                       uint8_t receive_data_length)
@@ -142,7 +37,7 @@ void sendReceiveBytes(uint8_t initial_command, uint16_t *received_data,
     DCX_COMMAND;
     SPI_pollingNonFIFOTransaction(Ili9341_SPI_BASE, 9U, initial_command << 1);
     DCX_DATA;
-    SPI_receiveNBytes(Ili9341_SPI_BASE, received_data, receive_data_length, 4);
+    SPI_receiveNBytes(Ili9341_SPI_BASE, received_data, receive_data_length, 0);
     CS_HIGH;
 }
 
@@ -162,7 +57,7 @@ void sendMultibyteData(uint8_t initial_command, uint16_t *data_packet, uint8_t d
     DCX_COMMAND;
     SPI_transmitByte(Ili9341_SPI_BASE, initial_command);
     DCX_DATA;
-    SPI_transmitNBytes(Ili9341_SPI_BASE, data_packet, datalength, 4);
+    SPI_transmitNBytes(Ili9341_SPI_BASE, data_packet, datalength, 0);
     CS_HIGH;
 }
 void sendByte(uint8_t command)
@@ -177,13 +72,12 @@ void sendByte(uint8_t command)
  * @param pixel_data
  * @return
  */
-int ili9341_writeFrameMemory(uint16_t* pixel_data, uint16_t data_length){
+int ili9341_startWriteFrameMemory(){//uint16_t* pixel_data, uint16_t data_length){
     checkInit;
     CS_LOW;
     DCX_COMMAND;
     SPI_transmitByte(Ili9341_SPI_BASE, ILI9341_CMD_MEMORY_WRITE);
-    DEVICE_DELAY_US(1);
-    sendDataFromDMA(0, pixel_data, data_length);
+    //sendDataFromDMA(0, pixel_data, data_length);
 //    DCX_DATA;
 //    SPI_pollingFIFOTransaction(Ili9341_SPI_BASE, 16U,  pixel_data, NULL, data_length, 0);
 //    CS_HIGH;
@@ -196,24 +90,23 @@ int ili9341_writeFrameMemory(uint16_t* pixel_data, uint16_t data_length){
  * @param storage_location
  * @return
  */
-int ili9341_readFrameMemory(uint16_t* storage_location, uint16_t data_length){
+int ili9341_startReadFrameMemory(void){//uint16_t* storage_location, uint16_t data_length){
     return ILI9341_ERROR;
 }
 
-int ili9341_writeMemoryContinue(uint16_t* pixel_data, uint16_t data_length){
+int ili9341_writeMemoryContinue(){//uint16_t* pixel_data, uint16_t data_length){
     checkInit;
     CS_LOW;
     DCX_COMMAND;
     SPI_transmitByte(Ili9341_SPI_BASE, ILI9341_CMD_WRITE_MEMORY_CONTINUE);
-    DEVICE_DELAY_US(1);
-    sendDataFromDMA(0, pixel_data, data_length);
+    //sendDataFromDMA(0, pixel_data, data_length);
 //    DCX_DATA;
 //    SPI_pollingFIFOTransaction(Ili9341_SPI_BASE, 16U,  pixel_data, NULL, data_length, 0);
 //    CS_HIGH;
     return ILI9341_SUCCESS;
 }
 
-int ili9341_readMemoryContinue(uint16_t* storage_location){
+int ili9341_readMemoryContinue(void){//uint16_t* storage_location){
     checkInit;
     return ILI9341_ERROR;
 }

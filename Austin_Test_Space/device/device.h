@@ -286,7 +286,7 @@
 // low speed peripheral clock divider of 4. Update the code below if a
 // different LSPCLK divider is used!
 //
-#define DEVICE_LSPCLK_FREQ          (DEVICE_SYSCLK_FREQ / 4)
+#define DEVICE_LSPCLK_FREQ          (DEVICE_SYSCLK_FREQ / 1)
 
 //*****************************************************************************
 //

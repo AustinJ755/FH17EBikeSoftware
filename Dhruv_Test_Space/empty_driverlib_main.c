@@ -49,13 +49,56 @@
 //
 #include "driverlib.h"
 #include "device.h"
+#include "board.h"
+#include "datalogger/datalogger.h"
 
 //
 // Main
 //
+char test_string[] = "hello";
+uint32_t test = 100;
+int32_t test2 = -5;
+float test3 = 1.5f;
+uint16_t pixels[120];
 void main(void)
 {
+    //
+    // Initialize device clock and peripherals
+    //
+    Device_init();
 
+    //
+    // Disable pin locks and enable internal pullups.
+    //
+    Device_initGPIO();
+
+    //
+    // Initialize PIE and clear PIE registers. Disables CPU interrupts.
+    //
+    Interrupt_initModule();
+
+    //
+    // Initialize the PIE vector table with pointers to the shell Interrupt
+    // Service Routines (ISR).
+    //
+    Interrupt_initVectorTable();
+
+
+    Board_init();
+
+
+
+    EINT;
+    ERTM;
+
+    logString(test_string);
+    logSignedInt(&test2);
+    logUInt(&test);
+    logFloat(&test3);
+    logUIntImmediate(test);
+    logSignedIntImmediate(test2);
+
+    checkDebugMessageQueue();
 }
 
 //

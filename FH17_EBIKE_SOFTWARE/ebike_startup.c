@@ -19,7 +19,7 @@
  * @param how a
  * @return a
  */
-int test(int what, double how){
+int test(int what, float how){
     return 0;
 }
 
