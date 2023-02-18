@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS
+CG_TOOL_ROOT := C:/ti/ccs1220/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS
 
 GEN_OPTS__FLAG := --cmd_file="syscfg/c2000ware_libraries.opt" 
 GEN_CMDS__FLAG := 
@@ -132,12 +132,6 @@ Mo_Test_Sapce.out \
 EXE_OUTPUTS__QUOTED += \
 "Mo_Test_Sapce.out" \
 
-BIN_OUTPUTS += \
-Mo_Test_Sapce.hex \
-
-BIN_OUTPUTS__QUOTED += \
-"Mo_Test_Sapce.hex" \
-
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
@@ -147,22 +141,14 @@ all: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 Mo_Test_Sapce.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: C2000 Linker'
-	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS/bin/cl2000" -v28 -ml -mt --cla_support=cla2 --float_support=fpu32 --tmu_support=tmu0 --vcu_support=vcu0 -Ooff --define=DEBUG --define=_LAUNCHXL_F280049C --define=_FLASH --diag_suppress=10063 --diag_warning=225 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"Mo_Test_Sapce.map" --heap_size=0x200 --stack_size=0x3F8 --warn_sections -i"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS/lib" -i"C:/ti/c2000/C2000Ware_4_02_00_00" -i"C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/syscfg" -i"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS/include" --reread_libs --define=_FLASH --diag_wrap=off --display_error_number --xml_link_info="Mo_Test_Sapce_linkInfo.xml" --entry_point=code_start --rom_model -o "Mo_Test_Sapce.out" $(ORDERED_OBJS)
+	"C:/ti/ccs1220/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS/bin/cl2000" -v28 -ml -mt --cla_support=cla2 --float_support=fpu32 --tmu_support=tmu0 --vcu_support=vcu0 -Ooff --define=DEBUG --define=_LAUNCHXL_F280049C --define=_FLASH --diag_suppress=10063 --diag_warning=225 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"Mo_Test_Sapce.map" --heap_size=0x200 --stack_size=0x3F8 --warn_sections -i"C:/ti/ccs1220/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS/lib" -i"C:/ti/c2000/C2000Ware_4_02_00_00" -i"C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/syscfg" -i"C:/ti/ccs1220/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS/include" --reread_libs --define=_FLASH --diag_wrap=off --display_error_number --xml_link_info="Mo_Test_Sapce_linkInfo.xml" --entry_point=code_start --rom_model -o "Mo_Test_Sapce.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
-	@echo ' '
-	@$(MAKE) --no-print-directory post-build
-
-Mo_Test_Sapce.hex: $(EXE_OUTPUTS)
-	@echo 'Building secondary target: "$@"'
-	@echo 'Invoking: C2000 Hex Utility'
-	"C:/ti/ccs1200/ccs/tools/compiler/ti-cgt-c2000_22.6.0.LTS/bin/hex2000" --diag_wrap=off -o "Mo_Test_Sapce.hex" $(EXE_OUTPUTS__QUOTED)
-	@echo 'Finished building secondary target: "$@"'
 	@echo ' '
 	@$(MAKE) --no-print-directory post-build
 
 # Other Targets
 clean:
-	-$(RM) $(GEN_MISC_FILES__QUOTED)$(BIN_OUTPUTS__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
+	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
 	-$(RM) "syscfg\board.obj" "syscfg\c2000ware_libraries.obj" "empty_driverlib_main.obj" "device\device.obj" "device\f28004x_codestartbranch.obj" 
 	-$(RM) "syscfg\board.d" "syscfg\c2000ware_libraries.d" "empty_driverlib_main.d" "device\device.d" 
 	-$(RM) "device\f28004x_codestartbranch.d" 
@@ -171,13 +157,13 @@ clean:
 	-@echo ' '
 
 post-build:
-	-if 0 == 1  mkdir "C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/simulation"
-	-if 0 == 1  C:/TDM-GCC-64/bin/g++  -c -DCLB_SIM -IC:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc-2.3.3/src -IC:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/include/type2 -IC:/Users/aj755/git/ExampleImport/Mo_Test_Sapce -IC:/TDM-GCC-64/bin/include -Og -g -gdwarf-3 -gstrict-dwarf -Wall -MMD -MP -MFC:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.d -MTC:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.o -IC:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/syscfg   -fno-threadsafe-statics  -oC:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.o C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/syscfg/clb_sim.cpp
-	-if 0 == 1  C:/TDM-GCC-64/bin/g++ -DCLB_SIM -Og -g -gdwarf-3 -gstrict-dwarf -Wall -Wl,-Map,C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/simulation/simulation_output.map -LC:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc-2.3.3/build/src -oC:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/simulation/simulation_output.exe C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_FSM_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_HLC_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_LUT4_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_OutputLUT_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_counter_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_counter_top_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_FSM_top_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_LUT4_top_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_OutputLUT_top_SC_model.o  -Wl,--start-group -lsystemc -Wl,--end-group
+	-if 0 == 1  mkdir "C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/simulation"
+	-if 0 == 1  C:/TDM-GCC-64/bin/g++  -c -DCLB_SIM -IC:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc-2.3.3/src -IC:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/include/type2 -IC:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce -IC:/TDM-GCC-64/bin/include -Og -g -gdwarf-3 -gstrict-dwarf -Wall -MMD -MP -MFC:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.d -MTC:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.o -IC:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/syscfg   -fno-threadsafe-statics  -oC:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.o C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/syscfg/clb_sim.cpp
+	-if 0 == 1  C:/TDM-GCC-64/bin/g++ -DCLB_SIM -Og -g -gdwarf-3 -gstrict-dwarf -Wall -Wl,-Map,C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/simulation/simulation_output.map -LC:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc-2.3.3/build/src -oC:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/simulation/simulation_output.exe C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/simulation/clb_sim.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_FSM_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_HLC_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_LUT4_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_OutputLUT_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_counter_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_counter_top_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_FSM_top_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_LUT4_top_SC_model.o C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/systemc/src/type2/CLB_OutputLUT_top_SC_model.o  -Wl,--start-group -lsystemc -Wl,--end-group
 	-if 0 == 1  "./simulation/simulation_output.exe"
-	-if 0 == 1  C:/ti/ccs1200/ccs/tools/node/node.exe "C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/dot_file_libraries/clbDotUtility.js"  "C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/" "C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/syscfg" "C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/syscfg/clb.dot"
-	-if 0 == 1  mkdir "C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/diagrams"
-	-if 0 == 1  C:/ti/ccs1200/ccs/tools/node/node.exe "C:/ti/c2000/C2000Ware_4_02_00_00/driverlib/.meta/generate_diagrams.js" "C:/ti/c2000/C2000Ware_4_02_00_00" "C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/diagrams" "C:/Users/aj755/git/ExampleImport/Mo_Test_Sapce/EBIKE_CFG/syscfg"
+	-if 0 == 1  C:/ti/ccs1220/ccs/tools/node/node.exe "C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/dot_file_libraries/clbDotUtility.js"  "C:/ti/c2000/C2000Ware_4_02_00_00/utilities/clb_tool/clb_syscfg/" "C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/syscfg" "C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/syscfg/clb.dot"
+	-if 0 == 1  mkdir "C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/diagrams"
+	-if 0 == 1  C:/ti/ccs1220/ccs/tools/node/node.exe "C:/ti/c2000/C2000Ware_4_02_00_00/driverlib/.meta/generate_diagrams.js" "C:/ti/c2000/C2000Ware_4_02_00_00" "C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/diagrams" "C:/Users/Zulima Ike/git/FH17EBikeSoftware/Mo_Test_Sapce/EBIKE_CFG/syscfg"
 	-@echo ' '
 
 .PHONY: all clean dependents
