@@ -2,8 +2,6 @@
 #ifndef UNTITLED1_RiderStats_H
 #define UNTITLED1_RiderStats_H
 
-#define SENTI -1f
-
 typedef struct RideStats {
         float AvgRidSpd;
         float AssisMiles;

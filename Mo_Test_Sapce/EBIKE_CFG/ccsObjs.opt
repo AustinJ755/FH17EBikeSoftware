@@ -1,3 +1,4 @@
+"./RiderStats.obj"
 "./syscfg/board.obj"
 "./syscfg/c2000ware_libraries.obj"
 "./empty_driverlib_main.obj"

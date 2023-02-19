@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "RiderStats.h"
-#include <string.h>
 
 
 /*
@@ -55,9 +54,9 @@ rideAvg avgStruct() {
     averages.battLoss = 0;
     averages.perBattMile = 0;
 
-
     //count stats elements and add the totals
-    for(int i = 0; i <= statsIndex; i++) {
+    int i;
+    for(i = 0; i <= statsIndex; i++) {
         averages.AvgSpd += logStats[i].AvgRidSpd; // first add up total speed before divide
         averages.TotAssisMiles += logStats[i].AssisMiles;
         averages.TotUnassisMiles += logStats[i].UnassisMiles;

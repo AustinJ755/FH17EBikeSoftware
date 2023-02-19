@@ -10,6 +10,7 @@ GEN_OPTS__FLAG := --cmd_file="syscfg/c2000ware_libraries.opt"
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./RiderStats.obj" \
 "./syscfg/board.obj" \
 "./syscfg/c2000ware_libraries.obj" \
 "./empty_driverlib_main.obj" \
@@ -149,8 +150,8 @@ Mo_Test_Sapce.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "syscfg\board.obj" "syscfg\c2000ware_libraries.obj" "empty_driverlib_main.obj" "device\device.obj" "device\f28004x_codestartbranch.obj" 
-	-$(RM) "syscfg\board.d" "syscfg\c2000ware_libraries.d" "empty_driverlib_main.d" "device\device.d" 
+	-$(RM) "RiderStats.obj" "syscfg\board.obj" "syscfg\c2000ware_libraries.obj" "empty_driverlib_main.obj" "device\device.obj" "device\f28004x_codestartbranch.obj" 
+	-$(RM) "RiderStats.d" "syscfg\board.d" "syscfg\c2000ware_libraries.d" "empty_driverlib_main.d" "device\device.d" 
 	-$(RM) "device\f28004x_codestartbranch.d" 
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
 	-@echo 'Finished clean'
