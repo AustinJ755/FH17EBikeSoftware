@@ -10,7 +10,6 @@ typedef struct RideStats {
         float UnassisMiles;
         float CurBattPer;
         float Time;
-        int Index;
 } rideStats;
 
 typedef struct RideAvg {
@@ -25,13 +24,17 @@ typedef struct RideAvg {
     float perBattMile;
 } rideAvg;
 
+rideStats logStats[50];
+
+int statsIndex;
+
 #endif //UNTITLED1_RiderStats_H
 
 
 
-rideStats* createRideArr();
+void statsInitialize();
 
-rideStats* updateRideArr(float avgRidSpd, float assisMiles, float unassisMiles,
-                    float curBattPer, float time, rideStats *stats);
+void updateRideArr(float avgRidSpd, float assisMiles, float unassisMiles,
+                    float curBattPer, float time);
 
-rideAvg avgStruct(rideStats *stats);
+rideAvg avgStruct();
