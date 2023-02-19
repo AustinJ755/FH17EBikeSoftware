@@ -80,6 +80,8 @@ rideAvg avgStruct() {
     averages.battLoss = logStats[0].CurBattPer - logStats[statsIndex].CurBattPer; //initial battery - last logged battery is battery loss
     averages.perBattMile = averages.battLoss / totMiles;
 
+    statsIndex = 0; //initialize the index when done
+
     return averages;
 }
 
