@@ -14,6 +14,7 @@ ORDERED_OBJS += \
 "./syscfg/board.obj" \
 "./syscfg/c2000ware_libraries.obj" \
 "./empty_driverlib_main.obj" \
+"./datalogger/datalogger.obj" \
 "./device/device.obj" \
 "./device/f28004x_codestartbranch.obj" \
 "C:/ti/c2000/C2000Ware_4_02_00_00/driverlib/f28004x/driverlib/ccs/Debug/driverlib.lib" \
@@ -29,8 +30,10 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
+-include datalogger/subdir_vars.mk
 -include device/subdir_vars.mk
 -include subdir_rules.mk
+-include datalogger/subdir_rules.mk
 -include device/subdir_rules.mk
 -include objects.mk
 
@@ -150,8 +153,8 @@ Mo_Test_Sapce.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "RiderStats.obj" "syscfg\board.obj" "syscfg\c2000ware_libraries.obj" "empty_driverlib_main.obj" "device\device.obj" "device\f28004x_codestartbranch.obj" 
-	-$(RM) "RiderStats.d" "syscfg\board.d" "syscfg\c2000ware_libraries.d" "empty_driverlib_main.d" "device\device.d" 
+	-$(RM) "RiderStats.obj" "syscfg\board.obj" "syscfg\c2000ware_libraries.obj" "empty_driverlib_main.obj" "datalogger\datalogger.obj" "device\device.obj" "device\f28004x_codestartbranch.obj" 
+	-$(RM) "RiderStats.d" "syscfg\board.d" "syscfg\c2000ware_libraries.d" "empty_driverlib_main.d" "datalogger\datalogger.d" "device\device.d" 
 	-$(RM) "device\f28004x_codestartbranch.d" 
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
 	-@echo 'Finished clean'
