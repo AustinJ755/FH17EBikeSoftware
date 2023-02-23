@@ -36,6 +36,7 @@ const gpio9  = gpio.addInstance();
 const gpio10 = gpio.addInstance();
 const gpio11 = gpio.addInstance();
 const gpio12 = gpio.addInstance();
+const gpio13 = gpio.addInstance();
 const sci    = scripting.addModule("/driverlib/sci.js", {}, false);
 const sci1   = sci.addInstance();
 const sci2   = sci.addInstance();
@@ -46,14 +47,31 @@ const spi2   = spi.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
-adc1.$name       = "ADC_PHASE_A";
-adc1.enabledSOCs = ["ADC_SOC_NUMBER0"];
+adc1.socHighPriorityMode = "ADC_PRI_SOC0_HIPRI";
+adc1.soc0Trigger         = "ADC_TRIGGER_EPWM1_SOCA";
+adc1.enabledSOCs         = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1"];
+adc1.soc1Channel         = "ADC_CH_ADCIN1";
+adc1.$name               = "ADC_A";
+adc1.soc0Name            = "PHASE_U_CURR_SAMPLE";
+adc1.soc1Name            = "THROTTLE_SAMPLE";
 
-adc2.$name   = "ADC_PHASE_B";
-adc2.adcBase = "ADCB_BASE";
+adc2.adcBase             = "ADCB_BASE";
+adc2.$name               = "ADC_B";
+adc2.socHighPriorityMode = "ADC_PRI_SOC0_HIPRI";
+adc2.enabledSOCs         = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1"];
+adc2.soc0Name            = "PHASE_CUR_SAMPLE";
+adc2.soc0Trigger         = "ADC_TRIGGER_EPWM1_SOCA";
+adc2.soc1Name            = "BATTERY_VOLTAGE_SAMPLE";
+adc2.soc1Channel         = "ADC_CH_ADCIN1";
 
-adc3.$name   = "ADC_PHASE_C";
-adc3.adcBase = "ADCC_BASE";
+adc3.adcBase             = "ADCC_BASE";
+adc3.$name               = "ADC_C";
+adc3.socHighPriorityMode = "ADC_PRI_SOC0_HIPRI";
+adc3.enabledSOCs         = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1"];
+adc3.soc0Name            = "PHASE_W_CURR_SAMPLE";
+adc3.soc0Trigger         = "ADC_TRIGGER_EPWM1_SOCA";
+adc3.soc1Name            = "MOTOR_CONTROL_TEMP_SENSE";
+adc3.soc1Channel         = "ADC_CH_ADCIN1";
 
 aio1.$name                  = "PHASE_U_CURRENT_SENSOR";
 aio1.aioPin["AIO#"].$assign = "boosterpack2.70";
@@ -73,8 +91,10 @@ aio5.aioPin["AIO#"].$assign = "boosterpack1.26";
 aio6.$name                  = "MOTOR_CONTROLLER_TEMP_SENSOR";
 aio6.aioPin["AIO#"].$assign = "boosterpack2.66";
 
-epwm1.$name     = "PHASE_A_EPWM";
-epwm1.$hardware = system.deviceData.board.components.BP_SITE_2.subComponents.PWM_LOC1;
+epwm1.$name                            = "PHASE_A_EPWM";
+epwm1.$hardware                        = system.deviceData.board.components.BP_SITE_2.subComponents.PWM_LOC1;
+epwm1.epwmEventTrigger_enableInterrupt = true;
+epwm1.epwmEventTrigger_interruptSource = "EPWM_INT_TBCTR_ZERO_OR_PERIOD";
 
 epwm2.$name     = "PHASE_B_EPWM";
 epwm2.$hardware = system.deviceData.board.components.BP_SITE_2.subComponents.PWM_LOC3;
@@ -127,6 +147,12 @@ scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EQEP2 Header
 gpio12.$name           = "MOTOR_CONTROL_FAULT_PIN";
 gpio12.gpioPin.$assign = "boosterpack2.51";
 scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to FSI Header on the LaunchPad F280049C\\. Consider selecting it in 'use hardware' above\\. @@@.+?@@@", gpio12, "gpioPin");
+
+gpio13.$name             = "ILI9341_GPIO_RESET_PIN";
+gpio13.direction         = "GPIO_DIR_MODE_OUT";
+gpio13.writeInitialValue = true;
+gpio13.gpioPin.$assign   = "boosterpack1.40";
+scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EPWM6 BP on the LaunchPad F280049C\\. Consider selecting it in 'use hardware' above\\. @@@.+?@@@", gpio13, "gpioPin");
 
 sci1.$hardware             = system.deviceData.board.components.XDS_UART.subComponents.XDS_SCI_INST1;
 sci1.enabledFIFOInterrupts = ["SCI_INT_RXFF"];
