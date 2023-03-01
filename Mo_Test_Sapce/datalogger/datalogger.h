@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "driverlib.h"
+#include "device.h"
 //
 #define MESSAGE_MASK                0xF0000000
 
