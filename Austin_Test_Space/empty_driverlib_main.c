@@ -49,6 +49,7 @@
 //
 #include "driverlib.h"
 #include "device.h"
+#include "math.h"
 #include "board.h"
 #include "./displayDriver/ili9341.h"
 #include "datalogger/datalogger.h"
@@ -87,7 +88,7 @@ void main(void)
 
 
     Board_init();
-
+    cos(test3);
 
 
     EINT;
