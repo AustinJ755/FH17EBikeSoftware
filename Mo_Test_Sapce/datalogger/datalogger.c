@@ -110,6 +110,7 @@ void sendUARTFloat(float float_to_send)
 
     gcvt(float_to_send, charCount, buffer);
 
+    //?
     SCI_writeCharArray(SCIA_BASE, (uint16_t*) buffer, charCount);
 }
 
