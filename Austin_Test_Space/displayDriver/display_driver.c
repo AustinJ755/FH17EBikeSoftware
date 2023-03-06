@@ -7,73 +7,7 @@
 #include "display_driver.h"
 #include "spi_dma.h"
 #include "ili9341.h"
-/**
- * Call to initialize the display module setups everything that you need must be called first
- * @return
- */
-int initDisplay(void)
-{
-    //TODO actually confirm that the display initializes correctly
-    init_ili9341();
-    uint32_t test=0;
-    for(test=0;test<800000;test++){
-
-    }
-    ili9341_exitSleep();
-    for(test=0;test<8000000;test++){
-
-    }
-    ili9341_NOP();
-    ili9341_readDisplayIDInfo(0);
-    uint32_t display_info;
-    ili9341_readDisplayStatus(&display_info);
-//    uint8_t ctrl_val = 0x24;
-//    ili9341_writeCTRLDisplay(ctrl_val);
-//    ili9341_readCTRLDisplay(&ctrl_val);
-//    uint8_t brightness = 0x50;
-//    ili9341_writeDisplayBrightness(0x45);
-//    ili9341_readDisplayBrightness(&brightness);
-    for(test=0;test<800000;test++){
-
-    }
-    ili9341_COLMODPixelFormatSet(0x55);
-    ili9341_memoryAccessControl(0x08);
-    ili9341_displayOn();
-    for(test=0;test<800000;test++){
-
-    }
-    return 0;
-}
-
-typedef enum
-{
-    NOCOMMAND,
-    SETCOLADDRESS,
-    SETROWADDRESS,
-    STARTFRAMEWRITE,
-    CONTINUEFRAMEWRITE,
-    STARTFRAMEREAD,
-    CONTINUEFRAMEREAD,
-    DRAWCFILLEDCOLORBOX,
-    DRAWFILLEDCOLORBOX2,
-    DRAWCHAR,
-    DRAWLINE
-} display_function;
-
-typedef struct
-{
-    display_function function;
-    uint16_t params[8];
-} display_command;
-
-#define FONT_X 5
-#define FONT_WIDTH (FONT_X+1)
-#define FONT_Y 8
-#define FONT_HEIGHT FONT_Y
-
 // standard ascii 5x8 font
-// originally from glcdfont.c from Adafruit project
-// standard ascii 5x7 font
 // originally from glcdfont.c from Adafruit project
 static const uint8_t Font[] = {
   0x00, 0x00, 0x00, 0x00, 0x00,
@@ -333,6 +267,72 @@ static const uint8_t Font[] = {
   0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
+
+/**
+ * Function to initialize the display
+ * @return 0 if display was correctly intialized
+ */
+int initDisplay(void)
+{
+    //TODO actually confirm that the display initializes correctly
+    init_ili9341();
+    uint32_t test=0;
+    for(test=0;test<800000;test++){
+
+    }
+    ili9341_exitSleep();
+    for(test=0;test<8000000;test++){
+
+    }
+    ili9341_NOP();
+    ili9341_readDisplayIDInfo(0);
+    uint32_t display_info;
+    ili9341_readDisplayStatus(&display_info);
+//    uint8_t ctrl_val = 0x24;
+//    ili9341_writeCTRLDisplay(ctrl_val);
+//    ili9341_readCTRLDisplay(&ctrl_val);
+//    uint8_t brightness = 0x50;
+//    ili9341_writeDisplayBrightness(0x45);
+//    ili9341_readDisplayBrightness(&brightness);
+    for(test=0;test<800000;test++){
+
+    }
+    ili9341_COLMODPixelFormatSet(0x55);
+    ili9341_memoryAccessControl(0x08);
+    ili9341_displayOn();
+    for(test=0;test<800000;test++){
+
+    }
+    return 0;
+}
+
+typedef enum
+{
+    NOCOMMAND,
+    SETCOLADDRESS,
+    SETROWADDRESS,
+    STARTFRAMEWRITE,
+    CONTINUEFRAMEWRITE,
+    STARTFRAMEREAD,
+    CONTINUEFRAMEREAD,
+    DRAWCFILLEDCOLORBOX,
+    DRAWFILLEDCOLORBOX2,
+    DRAWCHAR,
+    DRAWLINE
+} display_function;
+
+typedef struct
+{
+    display_function function;
+    uint16_t params[8];
+} display_command;
+
+#define FONT_X 5
+#define FONT_WIDTH (FONT_X+1)
+#define FONT_Y 8
+#define FONT_HEIGHT FONT_Y
+
+
 #define COMMANDFIFOSIZE 100
 
 static display_command commands_to_run[COMMANDFIFOSIZE];
@@ -342,7 +342,10 @@ static uint16_t next_command = 0;
 
 #pragma DATA_SECTION(commands_to_run, "ramgs2");
 static uint16_t check_display_locked = 0;
-//continue_transaction curr_transaction;
+
+/**
+ * DO NOT CALL ONLY THE DMA SHOULD BE CALLING THIS FUNCTION
+ */
 void displayDMAComplete(void)
 {
     check_display_locked = 0;
@@ -501,20 +504,27 @@ static void __DrawLine2(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t
       __DrawPixel(x0,y0,color);
      e2 = err; x2 = x0;
      if (2*e2 >= -dx) {                                           /* x step */
-        for (e2 += dy, y2 = y0; e2 < ed*wd && (y1 != y2 || dx > dy); e2 += dx)
+        for (e2 += dy, y2 = y0; e2 < ed*wd && (y1 != y2 || dx > dy); e2 += dx){
+            if(y2+sy>DISPLAYHEIGHT)break; //dont allow a wrap
             __DrawPixel(x0, y2 += sy, color);
+        }
         if (x0 == x1) break;
         e2 = err; err -= dy; x0 += sx;
      }
      if (2*e2 <= dy) {                                            /* y step */
-        for (e2 = dx-e2; e2 < ed*wd && (x1 != x2 || dx < dy); e2 += dy)
+        for (e2 = dx-e2; e2 < ed*wd && (x1 != x2 || dx < dy); e2 += dy){
+            if(x2+sx>DISPLAYWIDTH)break; //dont allow a wrap
            __DrawPixel(x2 += sx, y0, color);
+        }
         if (y0 == y1) break;
         err += dx; y0 += sy;
      }
   }
 }
 
+/**
+ * After display commands have been called this function MUST be called in order to execute them
+ */
 void checkDisplayCommandFifo(void)
 {
     //See if another process is already using this resource if so return
@@ -583,21 +593,8 @@ void checkDisplayCommandFifo(void)
     }
 }
 
-//void finishFCB(void)
-//{
-//    dma_transfer transfer;
-//    transfer.burst_step_size = 0;
-//    transfer.transaction_step_size = 0;
-//    transfer.transaction_warp_step = 0;
-//    transfer.transaction_wrap = 65535;
-//    transfer.data_address = SPI_DMA_BUFFER_1;
-//    transfer.transaction_count = 0;
-//    transfer.burst_size = curr_transaction.a;
-//    startIli9341DMATransaction(transfer);
-//
-//}
-
-uint16_t drawFilledColorBox2(uint16_t x, uint16_t y, uint16_t height,
+//old version shouldn't use
+static uint16_t drawFilledColorBox2(uint16_t x, uint16_t y, uint16_t height,
                             uint16_t width, uint16_t color)
 {
     //Do dimension checks
@@ -622,15 +619,6 @@ uint16_t drawFilledColorBox2(uint16_t x, uint16_t y, uint16_t height,
     putCommand(command);
 
     uint32_t pixels = ((uint32_t) (width + 1)) * ((uint32_t) (height + 1));
-//
-//    dma_transfer transfer;
-//    transfer.burst_step_size = 0;
-//    transfer.transaction_step_size = 0;
-//    transfer.transaction_warp_step = 0;
-//    transfer.transaction_wrap = 65535;
-//    transfer.data_address = SPI_DMA_BUFFER_1;
-//    transfer.transaction_count = pixels / 16;
-
     if (pixels < 16)
     {
         command.function = DRAWCFILLEDCOLORBOX;
@@ -662,6 +650,16 @@ uint16_t drawFilledColorBox2(uint16_t x, uint16_t y, uint16_t height,
     }
     return 0;
 }
+
+/**
+ * Puts a request to draw a filled box on the screen
+ * @param x - top left of the box
+ * @param y - top left of the box
+ * @param height - height going downards
+ * @param width - width going rightwards
+ * @param color - color of the box to be draw
+ * @return 0 if command was successfully added
+ */
 uint16_t drawFilledColorBox(uint16_t x, uint16_t y, uint16_t height,
                             uint16_t width, uint16_t color)
 {
@@ -682,15 +680,6 @@ uint16_t drawFilledColorBox(uint16_t x, uint16_t y, uint16_t height,
     command.params[3] = height;
 
     uint32_t pixels = ((uint32_t) (width + 1)) * ((uint32_t) (height + 1));
-//
-//    dma_transfer transfer;
-//    transfer.burst_step_size = 0;
-//    transfer.transaction_step_size = 0;
-//    transfer.transaction_warp_step = 0;
-//    transfer.transaction_wrap = 65535;
-//    transfer.data_address = SPI_DMA_BUFFER_1;
-//    transfer.transaction_count = pixels / 16;
-
     if (pixels < 16)
     {
         command.params[4] = pixels;
@@ -718,6 +707,16 @@ uint16_t drawFilledColorBox(uint16_t x, uint16_t y, uint16_t height,
     }
     return 0;
 }
+/**
+ * Draw a outline box
+ * @param x top left
+ * @param y top left
+ * @param height height going down
+ * @param width width going right
+ * @param color color of the outline
+ * @param thickness -thickness of the line going inwards
+ * @return 0 if successful
+ */
 uint16_t drawOutlineBox(uint16_t x, uint16_t y, uint16_t height,
                         uint16_t width, uint16_t color, uint16_t thickness)
 {
@@ -744,6 +743,17 @@ uint16_t drawOutlineBox(uint16_t x, uint16_t y, uint16_t height,
     return 0;
 }
 
+/**
+ * Puts a request to draw text onto the screen
+ * @note '\n' does work but doesn't put fill color in unpopulated spots
+ * @param x - the top left corner of text box
+ * @param y - the top left corner of text box
+ * @param string - string to write MUST be null terminated!!!! Maximum string length of 100 chars to prevent risk of unterminated strings
+ * @param text_color - color of the text to draw
+ * @param background_color - color of the background to to draw
+ * @param font_size - scaling of font must be 0<font_size<11
+ * @return 0 if successfully added command to queue. 3 if only part of string was added
+ */
 uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
                         uint16_t text_color, uint16_t background_color,
                         uint16_t font_size)
@@ -758,7 +768,7 @@ uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
     {
         return 1;
     }
-    if (font_size > 8)
+    if (font_size > 11 || font_size<1)
     {
         return 1;
     }
@@ -802,13 +812,44 @@ uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
     return 0;
 
 }
+/**
+ * Add request to draw a horizontal line. Use this instead of normal line function if possible. It is Significatly faster.
+ * @param x - start x
+ * @param y - start y
+ * @param length - going right
+ * @param thickness - going down
+ * @param color - color of line
+ * @return 0 if successfully added
+ */
 uint16_t drawHLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color){
     return drawFilledColorBox(x, y, thickness, length, color);
 }
+/**
+ * Add request to draw a vertical line. Use this instead of normal line function if possible. It is Significatly faster.
+ * @param x - start x
+ * @param y - start y
+ * @param length - going down
+ * @param thickness - going right
+ * @param color - color of line
+ * @return 0 if successfully added
+ */
 uint16_t drawVLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color){
     return drawFilledColorBox(x, y, length, thickness, color);
 }
 
+/**
+ * Draws a arbitrary line on the display
+ * code from http://members.chello.at/easyfilter/bresenham.html
+ *
+ * @note This function is slow compared to most other functions in this library
+ * @param startx starting x
+ * @param starty starting y
+ * @param endx end x
+ * @param endy end y
+ * @param color color of the line
+ * @param thickness thickness of the line
+ * @return 0 if successful
+ */
 uint16_t drawLine(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thickness){
     if(endy<starty||endy>DISPLAYHEIGHT){
         return 1;

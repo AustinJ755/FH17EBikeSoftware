@@ -16,10 +16,24 @@
 #define DISPLAYINTIALIZED 0
 #define DISPLAYWIDTH 319
 #define DISPLAYHEIGHT 239
+
+typedef enum{
+    SUCCESS =0,
+    FAIL =1,
+    OUT_OF_RANGE,
+    INVALIDFONT,
+    TOOMANYCHARS,
+}COMMAND_RESULTS;
+
 void checkDisplayCommandFifo(void);
+
 void displayDMAComplete(void);
+
 int initDisplay(void);
+
 uint16_t drawFilledColorBox(uint16_t x, uint16_t y, uint16_t height, uint16_t width, uint16_t color);
+
+
 uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
                         uint16_t text_color, uint16_t background_color,
                         uint16_t font_size);
