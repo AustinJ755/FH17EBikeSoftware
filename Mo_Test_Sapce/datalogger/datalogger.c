@@ -7,6 +7,11 @@
 
 #include "datalogger.h"
 #include "board.h"
+#include "driverlib.h"
+#include "device.h"
+#include <stdio.h>
+#include <stdlib.h>
+#define DECIMAL 10
 
 //always use this when referencing the DEBUG_UART_BASE
 #define DEBUG_UART_BASE DATA_LOG_UART_BASE;
@@ -69,21 +74,44 @@ uint16_t called = 0;
 void sendUARTString(char *message_to_send)
 {
     called++;
+    int charCount = sizeof(message_to_send) / sizeof(message_to_send[0]);
+
+    SCI_writeCharArray(SCIA_BASE, (uint16_t*) message_to_send, charCount);
 }
 
 void sendUARTUInt(uint32_t int_to_send)
 {
     called++;
+    char buffer[(sizeof(unsigned int) * 8) + 1];
+    int charCount = sizeof(buffer) / sizeof(buffer[0]);
+
+    utoa(int_to_send, buffer, DECIMAL);
+
+    SCI_writeCharArray(SCIA_BASE, (uint16_t*) buffer, charCount);
 }
 
 void sendUARTSInt(int32_t int_to_send)
 {
     called++;
+    char buffer[(sizeof(int) * 8) + 1];
+    int charCount = sizeof(buffer) / sizeof(buffer[0]);
+
+    itoa(int_to_send, buffer, DECIMAL);
+
+    SCI_writeCharArray(SCIA_BASE, (uint16_t*) buffer, charCount);
+
 }
 
-void sendUARTFloat(int32_t float_to_send)
+void sendUARTFloat(float float_to_send)
 {
     called++;
+    char buffer[(sizeof(float) * 8) + 1];
+    int charCount = sizeof(buffer) / sizeof(buffer[0]);
+
+    gcvt(float_to_send, charCount, buffer);
+
+    //?
+    SCI_writeCharArray(SCIA_BASE, (uint16_t*) buffer, charCount);
 }
 
 void checkDebugMessageQueue(void)
@@ -121,7 +149,6 @@ void checkDebugMessageQueue(void)
                 }
                 sendUARTSInt((int32_t) message_send);
                 break;
-
         }
     }
 }
