@@ -56,7 +56,8 @@ typedef enum
     CONTINUEFRAMEREAD,
     DRAWCFILLEDCOLORBOX,
     DRAWFILLEDCOLORBOX2,
-    DRAWCHAR
+    DRAWCHAR,
+    DRAWLINE
 } display_function;
 
 typedef struct
@@ -385,6 +386,22 @@ static display_command getCommand(void)
     EINT;
     return n_command;
 }
+static void __DrawPixel(uint16_t x, uint16_t y, uint16_t color){
+    ili9341_setRowAddress(x,x);
+    ili9341_setColumnAddress(y, y);
+    ili9341_startWriteFrameMemory();
+    ili9341_sendPixel(color);
+}
+static void __DrawPixels(uint16_t x, uint16_t y, uint16_t color,uint16_t thick){
+    ili9341_setRowAddress(x,x);
+    ili9341_setColumnAddress(y, y);
+    ili9341_startWriteFrameMemory();
+    uint16_t a = 0;
+    for(a=0;a<thick;a++){
+    ili9341_sendPixel(color);
+    }
+}
+
 static void __ColorBox(uint16_t burst, uint16_t transactions, uint16_t color)
 {
     SPI_DMA_BUFFER_1[0] = color;
@@ -456,6 +473,48 @@ static void __DrawChar(uint16_t x, uint16_t y, uint16_t text_color,
     transfer.burst_size = FONT_HEIGHT;
     startIli9341DMATransaction(transfer);
 }
+static void __DrawLine(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thick){
+
+
+    uint16_t dx = endx-startx;
+    uint16_t dy = endy-starty;
+    uint16_t x = startx;
+    for(;x<endx;x++){
+        uint16_t y = starty + dy * (x - startx) / dx;
+        __DrawPixels(x, y, color,thick);
+    }
+}
+#include "math.h"
+static void __DrawLine2(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thick)
+{
+    int x0 = startx;
+    int x1 = endx;
+    int y0 = starty;
+    int y1 = endy;
+    float wd = thick;
+  int dx = abs(x1-x0), sx = x0 < x1 ? 1 : -1;
+  int dy = abs(y1-y0), sy = y0 < y1 ? 1 : -1;
+  int err = dx-dy, e2, x2, y2;                          /* error value e_xy */
+  float ed = dx+dy == 0 ? 1 : sqrt((float)dx*dx+(float)dy*dy);
+
+  for (wd = (wd+1)/2; ; ) {                                   /* pixel loop */
+      __DrawPixel(x0,y0,color);
+     e2 = err; x2 = x0;
+     if (2*e2 >= -dx) {                                           /* x step */
+        for (e2 += dy, y2 = y0; e2 < ed*wd && (y1 != y2 || dx > dy); e2 += dx)
+            __DrawPixel(x0, y2 += sy, color);
+        if (x0 == x1) break;
+        e2 = err; err -= dy; x0 += sx;
+     }
+     if (2*e2 <= dy) {                                            /* y step */
+        for (e2 = dx-e2; e2 < ed*wd && (x1 != x2 || dx < dy); e2 += dy)
+           __DrawPixel(x2 += sx, y0, color);
+        if (y0 == y1) break;
+        err += dx; y0 += sy;
+     }
+  }
+}
+
 void checkDisplayCommandFifo(void)
 {
     //See if another process is already using this resource if so return
@@ -518,6 +577,8 @@ void checkDisplayCommandFifo(void)
             case DRAWCHAR:
                 __DrawChar(command_params[0],command_params[1],command_params[2],command_params[3],command_params[4],command_params[5]);
                 return;
+            case DRAWLINE:
+                __DrawLine2(command_params[0],command_params[1],command_params[2],command_params[3],command_params[4],command_params[5]);
         }
     }
 }
@@ -741,3 +802,30 @@ uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
     return 0;
 
 }
+uint16_t drawHLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color){
+    return drawFilledColorBox(x, y, thickness, length, color);
+}
+uint16_t drawVLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color){
+    return drawFilledColorBox(x, y, length, thickness, color);
+}
+
+uint16_t drawLine(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thickness){
+    if(endy<starty||endy>DISPLAYHEIGHT){
+        return 1;
+    }
+    if(endx<startx||endx+thickness>DISPLAYWIDTH){
+        return 1;
+    }
+    display_command command;
+    command.function = DRAWLINE;
+    command.params[0] = startx;
+    command.params[2] = endx;
+    command.params[1] = starty;
+    command.params[3] = endy;
+    command.params[4] = color;
+    command.params[5] = thickness;
+    putCommand(command);
+    return 0;
+}
+
+

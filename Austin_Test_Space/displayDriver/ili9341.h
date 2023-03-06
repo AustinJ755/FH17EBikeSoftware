@@ -229,7 +229,7 @@ int ili9341_writeCABCMinimumBrightness(uint8_t min_brightness);
 
 int ili9341_readCABCMinimumBrightness(uint8_t* min_brightness);
 
-
+void ili9341_sendPixel(uint16_t pixel);
 
 
 

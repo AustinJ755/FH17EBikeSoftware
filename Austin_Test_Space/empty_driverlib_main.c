@@ -113,11 +113,16 @@ void main(void)
     drawFilledColorBox(100, 150, 10,10, 0x87f0);
     drawFilledColorBox(300, 200, 10,10, 0x87f0);
     checkDisplayCommandFifo();
-    screenDrawText(50, 50, "gello\njorld\0", 0xD938, 0x87f0, 2);
+    screenDrawText(50, 50, "hello\nworld\0", 0xD938, 0x87f0, 2);
     checkDisplayCommandFifo();
     drawOutlineBox(10, 10, 50, 50, 0x87f0, 5);
     checkDisplayCommandFifo();
-
+    drawLine(10, 0, 50, 50, 0xD938,5);
+    checkDisplayCommandFifo();
+    drawLine(0, 0, 30, 50, 0xD938,2);
+        checkDisplayCommandFifo();
+        drawLine(0,100, 50, 125, 0xD938,3);
+            checkDisplayCommandFifo();
     for(;;){
     }
 //HRCAP

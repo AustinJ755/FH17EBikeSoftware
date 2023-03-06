@@ -25,5 +25,7 @@ uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
                         uint16_t font_size);
 uint16_t drawOutlineBox(uint16_t x, uint16_t y, uint16_t height,
                         uint16_t width, uint16_t color, uint16_t thickness);
-
+uint16_t drawHLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color);
+uint16_t drawVLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color);
+uint16_t drawLine(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thickness);
 #endif /* DISPLAYDRIVER_DISPLAY_DRIVER_H_ */

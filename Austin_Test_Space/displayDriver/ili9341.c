@@ -67,6 +67,12 @@ void sendByte(uint8_t command)
     SPI_transmitByte(Ili9341_SPI_BASE, command);
     CS_HIGH;
 }
+void ili9341_sendPixel(uint16_t pixel){
+    CS_LOW;
+    DCX_DATA;
+    SPI_pollingNonFIFOTransaction(Ili9341_SPI_BASE, 16, pixel);
+    CS_HIGH;
+}
 /**
  * This is what actually draws pixels to the display
  * @param pixel_data
