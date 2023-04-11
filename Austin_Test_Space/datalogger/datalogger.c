@@ -4,19 +4,26 @@
  *  Created on: Feb 5, 2023
  *      Author: aj755
  */
-
+//typedef uint16_t uint8_t;
 #include "datalogger.h"
+
 #include "board.h"
+#include "driverlib.h"
+#include "device.h"
+#include "customtools/stringtools.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define DECIMAL 10
 
 //always use this when referencing the DEBUG_UART_BASE
-#define DEBUG_UART_BASE DATA_LOG_UART_BASE;
-
+#define DEBUG_UART_BASE DATA_LOG_UART_BASE
+#define CHAR_BUFF_SIZE 50
 LOG_MESSAGE MESSAGEQUEUE[QUEUE_SIZE];
 uint16_t curr_message = 0;
 uint16_t next_message = 0;
 
 #pragma DATA_SECTION(MESSAGEQUEUE, "ramls6");
-
 uint16_t pushMessage(LOG_MESSAGE message)
 {
     //Only one push or pop event may be occurring at a time.
@@ -69,23 +76,46 @@ uint16_t called = 0;
 void sendUARTString(char *message_to_send)
 {
     called++;
+    int charCount = strlen(message_to_send);
+
+    SCI_writeCharArray(DEBUG_UART_BASE, (uint16_t*) message_to_send, charCount);
 }
 
 void sendUARTUInt(uint32_t int_to_send)
 {
     called++;
+    char buffer[20];
+    unsigned2String(int_to_send, buffer, DECIMAL);
+    int charCount = strlen(buffer);
+    SCI_writeCharArray(DEBUG_UART_BASE, (uint16_t*) buffer, charCount);
 }
 
 void sendUARTSInt(int32_t int_to_send)
 {
     called++;
+    char buffer[20];
+    signed2String(int_to_send, buffer, DECIMAL);
+    int charCount = strlen(buffer);
+    SCI_writeCharArray(DEBUG_UART_BASE, (uint16_t*) buffer, charCount);
+
 }
 
-void sendUARTFloat(int32_t float_to_send)
+void sendUARTFloat(float float_to_send)
 {
     called++;
+    char buffer[CHAR_BUFF_SIZE+1]={0,};
+    char* buf = buffer;
+    if(float_to_send<1e5&&float_to_send>1e-5){
+        buf =  float2StringSimple(float_to_send,buffer);
+    }else{
+    float2StringComplex(float_to_send, buffer);//_float_to_char(float_to_send, buffer);
+    }
+    int charCount = strlen(buf);
+    SCI_writeCharArray(DEBUG_UART_BASE, (uint16_t*) buf, charCount);
 }
 
+
+//TODO make all these functions thread safe
 void checkDebugMessageQueue(void)
 {
     //Either dequeue messages until empty or dequeue 20 messages and pass control
@@ -121,7 +151,6 @@ void checkDebugMessageQueue(void)
                 }
                 sendUARTSInt((int32_t) message_send);
                 break;
-
         }
     }
 }

@@ -1,3 +1,8 @@
+doxygen/doxygen_new_line_after_brief=true
+doxygen/doxygen_use_brief_tag=false
+doxygen/doxygen_use_javadoc_tags=true
+doxygen/doxygen_use_pre_tag=false
+doxygen/doxygen_use_structural_commands=false
 eclipse.preferences.version=1
 org.eclipse.cdt.core.formatter.alignment_for_arguments_in_method_invocation=18
 org.eclipse.cdt.core.formatter.alignment_for_assignment=16
@@ -20,7 +25,7 @@ org.eclipse.cdt.core.formatter.brace_position_for_array_initializer=end_of_line
 org.eclipse.cdt.core.formatter.brace_position_for_block=next_line
 org.eclipse.cdt.core.formatter.brace_position_for_block_in_case=next_line
 org.eclipse.cdt.core.formatter.brace_position_for_linkage_declaration=end_of_line
-org.eclipse.cdt.core.formatter.brace_position_for_method_declaration=next_line
+org.eclipse.cdt.core.formatter.brace_position_for_method_declaration=end_of_line
 org.eclipse.cdt.core.formatter.brace_position_for_namespace_declaration=next_line
 org.eclipse.cdt.core.formatter.brace_position_for_switch=next_line
 org.eclipse.cdt.core.formatter.brace_position_for_type_declaration=next_line

@@ -1,7 +1,7 @@
 ******************************************************************************
              TMS320C2000 Linker PC v22.6.0                     
 ******************************************************************************
->> Linked Wed Mar  1 12:56:15 2023
+>> Linked Wed Apr  5 12:05:18 2023
 
 OUTPUT FILE NAME:   <Mo_Test_Sapce.out>
 ENTRY POINT SYMBOL: "code_start"  address: 00080000
@@ -235,7 +235,7 @@ MODULE SUMMARY
     +--+-----------------------------+------+---------+---------+
        Total:                        2517   612       0      
                                                              
-    C:\ti\ccs1220\ccs\tools\compiler\ti-cgt-c2000_22.6.0.LTS\lib\rts2800_fpu32_eabi.lib
+    C:\ti\ccs1200\ccs\tools\compiler\ti-cgt-c2000_22.6.0.LTS\lib\rts2800_fpu32_eabi.lib
        exit.c.obj                    41     0         6      
        copy_decompress_lzss.c.obj    46     0         0      
        autoinit.c.obj                43     0         0      

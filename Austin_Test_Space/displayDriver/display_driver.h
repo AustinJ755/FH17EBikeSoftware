@@ -10,6 +10,10 @@
 
 #include <stdint.h>
 //Use the default SPI line for SPI_A
+#define FONT_X 5
+#define FONT_WIDTH (FONT_X+1)
+#define FONT_Y 8
+#define FONT_HEIGHT FONT_Y
 
 
 

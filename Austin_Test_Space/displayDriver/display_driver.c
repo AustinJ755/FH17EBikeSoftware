@@ -7,6 +7,8 @@
 #include "display_driver.h"
 #include "spi_dma.h"
 #include "ili9341.h"
+
+// @formatter:off
 // standard ascii 5x8 font
 // originally from glcdfont.c from Adafruit project
 static const uint8_t Font[] = {
@@ -266,7 +268,7 @@ static const uint8_t Font[] = {
   0x00, 0x3C, 0x3C, 0x3C, 0x3C,
   0x00, 0x00, 0x00, 0x00, 0x00,
 };
-
+// @formatter:on
 
 /**
  * Function to initialize the display
@@ -276,12 +278,14 @@ int initDisplay(void)
 {
     //TODO actually confirm that the display initializes correctly
     init_ili9341();
-    uint32_t test=0;
-    for(test=0;test<800000;test++){
+    uint32_t test = 0;
+    for (test = 0; test < 800000; test++)
+    {
 
     }
     ili9341_exitSleep();
-    for(test=0;test<8000000;test++){
+    for (test = 0; test < 8000000; test++)
+    {
 
     }
     ili9341_NOP();
@@ -294,13 +298,15 @@ int initDisplay(void)
 //    uint8_t brightness = 0x50;
 //    ili9341_writeDisplayBrightness(0x45);
 //    ili9341_readDisplayBrightness(&brightness);
-    for(test=0;test<800000;test++){
+    for (test = 0; test < 800000; test++)
+    {
 
     }
     ili9341_COLMODPixelFormatSet(0x55);
     ili9341_memoryAccessControl(0x08);
     ili9341_displayOn();
-    for(test=0;test<800000;test++){
+    for (test = 0; test < 800000; test++)
+    {
 
     }
     return 0;
@@ -326,11 +332,6 @@ typedef struct
     display_function function;
     uint16_t params[8];
 } display_command;
-
-#define FONT_X 5
-#define FONT_WIDTH (FONT_X+1)
-#define FONT_Y 8
-#define FONT_HEIGHT FONT_Y
 
 
 #define COMMANDFIFOSIZE 100
@@ -389,21 +390,24 @@ static display_command getCommand(void)
     EINT;
     return n_command;
 }
-static void __DrawPixel(uint16_t x, uint16_t y, uint16_t color){
-    ili9341_setRowAddress(x,x);
+static void __DrawPixel(uint16_t x, uint16_t y, uint16_t color)
+{
+    ili9341_setRowAddress(x, x);
     ili9341_setColumnAddress(y, y);
     ili9341_startWriteFrameMemory();
     ili9341_sendPixel(color);
 }
-static void __DrawPixels(uint16_t x, uint16_t y, uint16_t color,uint16_t thick){
-    ili9341_setRowAddress(x,x);
-    ili9341_setColumnAddress(y, y);
-    ili9341_startWriteFrameMemory();
-    uint16_t a = 0;
-    for(a=0;a<thick;a++){
-    ili9341_sendPixel(color);
-    }
-}
+//static void __DrawPixels(uint16_t x, uint16_t y, uint16_t color, uint16_t thick)
+//{
+//    ili9341_setRowAddress(x, x);
+//    ili9341_setColumnAddress(y, y);
+//    ili9341_startWriteFrameMemory();
+//    uint16_t a = 0;
+//    for (a = 0; a < thick; a++)
+//    {
+//        ili9341_sendPixel(color);
+//    }
+//}
 
 static void __ColorBox(uint16_t burst, uint16_t transactions, uint16_t color)
 {
@@ -420,10 +424,11 @@ static void __ColorBox(uint16_t burst, uint16_t transactions, uint16_t color)
 
 }
 
-static void __ColorBox2(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t burst, uint16_t transactions, uint16_t color)
+static void __ColorBox2(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
+                        uint16_t burst, uint16_t transactions, uint16_t color)
 {
-    ili9341_setRowAddress(x,x+width);
-    ili9341_setColumnAddress(y, y+height);
+    ili9341_setRowAddress(x, x + width);
+    ili9341_setColumnAddress(y, y + height);
     ili9341_startWriteFrameMemory();
     SPI_DMA_BUFFER_1[0] = color;
     dma_transfer transfer;
@@ -439,12 +444,12 @@ static void __ColorBox2(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
 }
 
 static void __DrawChar(uint16_t x, uint16_t y, uint16_t text_color,
-                      uint16_t background_color,
-                      uint16_t font_size,uint16_t let)
+                       uint16_t background_color, uint16_t font_size,
+                       uint16_t let)
 {
     //setup memory
-    int i=0;
-    int on_x,on_y,scaley,scalex;
+    int i = 0;
+    int on_x, on_y, scaley, scalex;
     for (on_x = 0; on_x < FONT_WIDTH; on_x++)
     {
         for (scalex = 0; scalex < font_size; scalex++)
@@ -453,10 +458,15 @@ static void __DrawChar(uint16_t x, uint16_t y, uint16_t text_color,
             {
                 for (scaley = 0; scaley < font_size; scaley++)
                 {
-                    if(on_x>FONT_X-1){
-                        SPI_DMA_BUFFER_1[i]=background_color;
-                    }else{
-                        SPI_DMA_BUFFER_1[i]=(Font[let*5+on_x]&(0x1<<on_y))!=0?text_color:background_color;
+                    if (on_x > FONT_X - 1)
+                    {
+                        SPI_DMA_BUFFER_1[i] = background_color;
+                    }
+                    else
+                    {
+                        SPI_DMA_BUFFER_1[i] =
+                                (Font[let * 5 + on_x] & (0x1 << on_y)) != 0 ?
+                                        text_color : background_color;
                     }
                     i++;
                 }
@@ -472,54 +482,71 @@ static void __DrawChar(uint16_t x, uint16_t y, uint16_t text_color,
     transfer.transaction_warp_step = 1;
     transfer.transaction_wrap = 65535;
     transfer.data_address = SPI_DMA_BUFFER_1;
-    transfer.transaction_count = i/FONT_HEIGHT;
+    transfer.transaction_count = i / FONT_HEIGHT;
     transfer.burst_size = FONT_HEIGHT;
     startIli9341DMATransaction(transfer);
 }
-static void __DrawLine(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thick){
-
-
-    uint16_t dx = endx-startx;
-    uint16_t dy = endy-starty;
-    uint16_t x = startx;
-    for(;x<endx;x++){
-        uint16_t y = starty + dy * (x - startx) / dx;
-        __DrawPixels(x, y, color,thick);
-    }
-}
+//static void __DrawLine(uint16_t startx, uint16_t starty, uint16_t endx,
+//                       uint16_t endy, uint16_t color, uint16_t thick)
+//{
+//
+//    uint16_t dx = endx - startx;
+//    uint16_t dy = endy - starty;
+//    uint16_t x = startx;
+//    for (; x < endx; x++)
+//    {
+//        uint16_t y = starty + dy * (x - startx) / dx;
+//        __DrawPixels(x, y, color, thick);
+//    }
+//}
 #include "math.h"
-static void __DrawLine2(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thick)
+static void __DrawLine2(uint16_t startx, uint16_t starty, uint16_t endx,
+                        uint16_t endy, uint16_t color, uint16_t thick)
 {
     int x0 = startx;
     int x1 = endx;
     int y0 = starty;
     int y1 = endy;
     float wd = thick;
-  int dx = abs(x1-x0), sx = x0 < x1 ? 1 : -1;
-  int dy = abs(y1-y0), sy = y0 < y1 ? 1 : -1;
-  int err = dx-dy, e2, x2, y2;                          /* error value e_xy */
-  float ed = dx+dy == 0 ? 1 : sqrt((float)dx*dx+(float)dy*dy);
+    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    int err = dx - dy, e2, x2, y2; /* error value e_xy */
+    float ed = dx + dy == 0 ? 1 : sqrtf((float) dx * dx + (float) dy * dy);
 
-  for (wd = (wd+1)/2; ; ) {                                   /* pixel loop */
-      __DrawPixel(x0,y0,color);
-     e2 = err; x2 = x0;
-     if (2*e2 >= -dx) {                                           /* x step */
-        for (e2 += dy, y2 = y0; e2 < ed*wd && (y1 != y2 || dx > dy); e2 += dx){
-            if(y2+sy>DISPLAYHEIGHT)break; //dont allow a wrap
-            __DrawPixel(x0, y2 += sy, color);
+    for (wd = (wd + 1) / 2;;)
+    { /* pixel loop */
+        __DrawPixel(x0, y0, color);
+        e2 = err;
+        x2 = x0;
+        if (2 * e2 >= -dx)
+        { /* x step */
+            for (e2 += dy, y2 = y0; e2 < ed * wd && (y1 != y2 || dx > dy); e2 +=
+                    dx)
+            {
+                if (y2 + sy > DISPLAYHEIGHT)
+                    break; //dont allow a wrap
+                __DrawPixel(x0, y2 += sy, color);
+            }
+            if (x0 == x1)
+                break;
+            e2 = err;
+            err -= dy;
+            x0 += sx;
         }
-        if (x0 == x1) break;
-        e2 = err; err -= dy; x0 += sx;
-     }
-     if (2*e2 <= dy) {                                            /* y step */
-        for (e2 = dx-e2; e2 < ed*wd && (x1 != x2 || dx < dy); e2 += dy){
-            if(x2+sx>DISPLAYWIDTH)break; //dont allow a wrap
-           __DrawPixel(x2 += sx, y0, color);
+        if (2 * e2 <= dy)
+        { /* y step */
+            for (e2 = dx - e2; e2 < ed * wd && (x1 != x2 || dx < dy); e2 += dy)
+            {
+                if (x2 + sx > DISPLAYWIDTH)
+                    break; //dont allow a wrap
+                __DrawPixel(x2 += sx, y0, color);
+            }
+            if (y0 == y1)
+                break;
+            err += dx;
+            y0 += sy;
         }
-        if (y0 == y1) break;
-        err += dx; y0 += sy;
-     }
-  }
+    }
 }
 
 /**
@@ -528,6 +555,8 @@ static void __DrawLine2(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t
 void checkDisplayCommandFifo(void)
 {
     //See if another process is already using this resource if so return
+
+    //TODO make this thread RTOS Safe
     DINT;
     if (check_display_locked != 0)
     {
@@ -585,71 +614,75 @@ void checkDisplayCommandFifo(void)
                             command_params[6]);
                 return;
             case DRAWCHAR:
-                __DrawChar(command_params[0],command_params[1],command_params[2],command_params[3],command_params[4],command_params[5]);
+                __DrawChar(command_params[0], command_params[1],
+                           command_params[2], command_params[3],
+                           command_params[4], command_params[5]);
                 return;
             case DRAWLINE:
-                __DrawLine2(command_params[0],command_params[1],command_params[2],command_params[3],command_params[4],command_params[5]);
+                __DrawLine2(command_params[0], command_params[1],
+                            command_params[2], command_params[3],
+                            command_params[4], command_params[5]);
         }
     }
 }
 
-//old version shouldn't use
-static uint16_t drawFilledColorBox2(uint16_t x, uint16_t y, uint16_t height,
-                            uint16_t width, uint16_t color)
-{
-    //Do dimension checks
-    if (x > 319 || y > 239)
-    {
-        return 1;
-    }
-    if (x + width > 319 || y + height > 239)
-    {
-        return 1;
-    }
-    display_command command;
-    command.function = SETROWADDRESS;
-    command.params[0] = x;
-    command.params[1] = x + width;
-    putCommand(command);
-    command.function = SETCOLADDRESS;
-    command.params[0] = y;
-    command.params[1] = y + height;
-    putCommand(command);
-    command.function = STARTFRAMEWRITE;
-    putCommand(command);
-
-    uint32_t pixels = ((uint32_t) (width + 1)) * ((uint32_t) (height + 1));
-    if (pixels < 16)
-    {
-        command.function = DRAWCFILLEDCOLORBOX;
-        command.params[0] = pixels;
-        command.params[1] = 0;
-        command.params[2] = color;
-        putCommand(command);
-    }
-    else if (pixels % 16 != 0)
-    {
-        command.function = DRAWCFILLEDCOLORBOX;
-        command.params[0] = 16;
-        command.params[1] = pixels / 16;
-        command.params[2] = color;
-        putCommand(command);
-        command.function = DRAWCFILLEDCOLORBOX;
-        command.params[0] = pixels % 16;
-        command.params[1] = 0;
-        command.params[2] = color;
-        putCommand(command);
-    }
-    else
-    {
-        command.function = DRAWCFILLEDCOLORBOX;
-        command.params[0] = 16;
-        command.params[1] = pixels / 16;
-        command.params[2] = color;
-        putCommand(command);
-    }
-    return 0;
-}
+////old version shouldn't use
+//static uint16_t drawFilledColorBox2(uint16_t x, uint16_t y, uint16_t height,
+//                                    uint16_t width, uint16_t color)
+//{
+//    //Do dimension checks
+//    if (x > 319 || y > 239)
+//    {
+//        return 1;
+//    }
+//    if (x + width > 319 || y + height > 239)
+//    {
+//        return 1;
+//    }
+//    display_command command;
+//    command.function = SETROWADDRESS;
+//    command.params[0] = x;
+//    command.params[1] = x + width;
+//    putCommand(command);
+//    command.function = SETCOLADDRESS;
+//    command.params[0] = y;
+//    command.params[1] = y + height;
+//    putCommand(command);
+//    command.function = STARTFRAMEWRITE;
+//    putCommand(command);
+//
+//    uint32_t pixels = ((uint32_t) (width + 1)) * ((uint32_t) (height + 1));
+//    if (pixels < 16)
+//    {
+//        command.function = DRAWCFILLEDCOLORBOX;
+//        command.params[0] = pixels;
+//        command.params[1] = 0;
+//        command.params[2] = color;
+//        putCommand(command);
+//    }
+//    else if (pixels % 16 != 0)
+//    {
+//        command.function = DRAWCFILLEDCOLORBOX;
+//        command.params[0] = 16;
+//        command.params[1] = pixels / 16;
+//        command.params[2] = color;
+//        putCommand(command);
+//        command.function = DRAWCFILLEDCOLORBOX;
+//        command.params[0] = pixels % 16;
+//        command.params[1] = 0;
+//        command.params[2] = color;
+//        putCommand(command);
+//    }
+//    else
+//    {
+//        command.function = DRAWCFILLEDCOLORBOX;
+//        command.params[0] = 16;
+//        command.params[1] = pixels / 16;
+//        command.params[2] = color;
+//        putCommand(command);
+//    }
+//    return 0;
+//}
 
 /**
  * Puts a request to draw a filled box on the screen
@@ -717,8 +750,8 @@ uint16_t drawFilledColorBox(uint16_t x, uint16_t y, uint16_t height,
  * @param thickness -thickness of the line going inwards
  * @return 0 if successful
  */
-uint16_t drawOutlineBox(uint16_t x, uint16_t y, uint16_t height,
-                        uint16_t width, uint16_t color, uint16_t thickness)
+uint16_t drawOutlineBox(uint16_t x, uint16_t y, uint16_t height, uint16_t width,
+                        uint16_t color, uint16_t thickness)
 {
     //Do dimension checks
     if (x > DISPLAYWIDTH || y > DISPLAYHEIGHT)
@@ -729,17 +762,20 @@ uint16_t drawOutlineBox(uint16_t x, uint16_t y, uint16_t height,
     {
         return 1;
     }
-    if(thickness>width||thickness>height){
+    if (thickness > width || thickness > height)
+    {
         return 2;
     }
     //Draw top line
-    drawFilledColorBox(x, y, thickness-1, width, color);
+    drawFilledColorBox(x, y, thickness - 1, width, color);
     //Draw bottom line
-    drawFilledColorBox(x, y+height-(thickness-1), thickness-1, width, color);
+    drawFilledColorBox(x, y + height - (thickness - 1), thickness - 1, width,
+                       color);
     //Draw left line
-    drawFilledColorBox(x, y, height, thickness-1, color);
+    drawFilledColorBox(x, y, height, thickness - 1, color);
     //Draw right line
-    drawFilledColorBox(x+width-(thickness-1), y, height, thickness-1, color);
+    drawFilledColorBox(x + width - (thickness - 1), y, height, thickness - 1,
+                       color);
     return 0;
 }
 
@@ -768,7 +804,7 @@ uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
     {
         return 1;
     }
-    if (font_size > 11 || font_size<1)
+    if (font_size > 11 || font_size < 1)
     {
         return 1;
     }
@@ -821,7 +857,9 @@ uint16_t screenDrawText(uint16_t x, uint16_t y, char *string,
  * @param color - color of line
  * @return 0 if successfully added
  */
-uint16_t drawHLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color){
+uint16_t drawHLine(uint16_t x, uint16_t y, uint16_t length, uint16_t thickness,
+                   uint16_t color)
+{
     return drawFilledColorBox(x, y, thickness, length, color);
 }
 /**
@@ -833,7 +871,9 @@ uint16_t drawHLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, u
  * @param color - color of line
  * @return 0 if successfully added
  */
-uint16_t drawVLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, uint16_t color){
+uint16_t drawVLine(uint16_t x, uint16_t y, uint16_t length, uint16_t thickness,
+                   uint16_t color)
+{
     return drawFilledColorBox(x, y, length, thickness, color);
 }
 
@@ -850,11 +890,15 @@ uint16_t drawVLine(uint16_t x, uint16_t y, uint16_t length,uint16_t thickness, u
  * @param thickness thickness of the line
  * @return 0 if successful
  */
-uint16_t drawLine(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy, uint16_t color,uint16_t thickness){
-    if(endy<starty||endy>DISPLAYHEIGHT){
+uint16_t drawLine(uint16_t startx, uint16_t starty, uint16_t endx,
+                  uint16_t endy, uint16_t color, uint16_t thickness)
+{
+    if (endy < starty || endy > DISPLAYHEIGHT)
+    {
         return 1;
     }
-    if(endx<startx||endx+thickness>DISPLAYWIDTH){
+    if (endx < startx || endx + thickness > DISPLAYWIDTH)
+    {
         return 1;
     }
     display_command command;
@@ -868,5 +912,4 @@ uint16_t drawLine(uint16_t startx,uint16_t starty, uint16_t endx, uint16_t endy,
     putCommand(command);
     return 0;
 }
-
 

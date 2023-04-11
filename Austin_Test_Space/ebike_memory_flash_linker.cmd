@@ -74,7 +74,7 @@ PAGE 1 :
 SECTIONS
 {
    codestart        : > BEGIN,     PAGE = 0, ALIGN(4)
-   .text            : >> FLASH_BANK0_SEC2 | FLASH_BANK0_SEC3 | FLASH_BANK0_SEC5 | FLASH_BANK0_SEC6 | FLASH_BANK0_SEC7,   PAGE = 0, ALIGN(4)
+   .text            : >> FLASH_BANK0_SEC2 | FLASH_BANK0_SEC3 | FLASH_BANK0_SEC5 | FLASH_BANK0_SEC6 | FLASH_BANK0_SEC7|FLASH_BANK0_SEC8|FLASH_BANK0_SEC9|FLASH_BANK0_SEC10,   PAGE = 0, ALIGN(4)
    .cinit           : > FLASH_BANK0_SEC1,     PAGE = 0, ALIGN(4)
    .switch          : > FLASH_BANK0_SEC1,     PAGE = 0, ALIGN(4)
    .reset           : > RESET,     PAGE = 0, TYPE = DSECT /* not used, */
@@ -89,7 +89,7 @@ SECTIONS
    .data            : > RAMLS5,       PAGE = 1
    .sysmem          : > RAMLS5,       PAGE = 1
    /* Initalized sections go in Flash */
-   .const           : > FLASH_BANK0_SEC4,       PAGE = 0,       ALIGN(4)
+   .const           : >> FLASH_BANK1_SEC2|FLASH_BANK1_SEC3|FLASH_BANK1_SEC4|FLASH_BANK1_SEC5,       PAGE = 0,       ALIGN(4)
 #else
    .pinit           : > FLASH_BANK0_SEC1,       PAGE = 0,       ALIGN(4)
    .ebss            : > RAMLS5,       PAGE = 1

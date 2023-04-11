@@ -20,6 +20,93 @@ LOG_MESSAGE MESSAGEQUEUE[QUEUE_SIZE];
 uint16_t curr_message = 0;
 uint16_t next_message = 0;
 
+
+#include <stdlib.h>
+
+char *
+__utoa (unsigned value,
+        char *str,
+        int base)
+{
+  const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+  int i, j;
+  unsigned remainder;
+  char c;
+
+  /* Check base is supported. */
+  if ((base < 2) || (base > 36))
+    {
+      str[0] = '\0';
+      return NULL;
+    }
+
+  /* Convert to string. Digits are in reverse order.  */
+  i = 0;
+  do
+    {
+      remainder = value % base;
+      str[i++] = digits[remainder];
+      value = value / base;
+    } while (value != 0);
+  str[i] = '\0';
+
+  /* Reverse string.  */
+  for (j = 0, i--; j < i; j++, i--)
+    {
+      c = str[j];
+      str[j] = str[i];
+      str[i] = c;
+    }
+
+  return str;
+}
+
+char *
+utoa (unsigned value,
+        char *str,
+        int base)
+{
+  return __utoa (value, str, base);
+}
+
+char *
+__itoa (int value,
+        char *str,
+        int base)
+{
+  unsigned uvalue;
+  int i = 0;
+
+  /* Check base is supported. */
+  if ((base < 2) || (base > 36))
+    {
+      str[0] = '\0';
+      return NULL;
+    }
+
+  /* Negative numbers are only supported for decimal.
+   * Cast to unsigned to avoid overflow for maximum negative value.  */
+  if ((base == 10) && (value < 0))
+    {
+      str[i++] = '-';
+      uvalue = (unsigned)-value;
+    }
+  else
+    uvalue = (unsigned)value;
+
+  __utoa (uvalue, &str[i], base);
+  return str;
+}
+
+char *
+itoa (int value,
+        char *str,
+        int base)
+{
+  return __itoa (value, str, base);
+}
+
+
 #pragma DATA_SECTION(MESSAGEQUEUE, "ramls6");
 
 uint16_t pushMessage(LOG_MESSAGE message)
@@ -108,7 +195,7 @@ void sendUARTFloat(float float_to_send)
     char buffer[(sizeof(float) * 8) + 1];
     int charCount = sizeof(buffer) / sizeof(buffer[0]);
 
-    gcvt(float_to_send, charCount, buffer);
+    //gcvt(float_to_send, charCount, buffer);
 
     //?
     SCI_writeCharArray(SCIA_BASE, (uint16_t*) buffer, charCount);

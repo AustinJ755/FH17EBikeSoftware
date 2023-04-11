@@ -29,7 +29,7 @@ uint16_t pushMessage(LOG_MESSAGE message);
 
 //We only want this section to ever be poping messages
 //LOG_MESSAGE popMessage(void);
-
+//char * _float_to_char(float x, char *p);
 
 //Log functions
 void checkDebugMessageQueue(void);
@@ -48,7 +48,6 @@ static inline uint16_t logUInt(uint32_t* log_int){
 static inline uint16_t logSignedInt(int32_t* log_int){
     return pushMessage((((LOG_MESSAGE)log_int)&MESSAGE_MASK_CLEAR)|MESSAGE_SINT_PTR_MASK);
 }
-
 //These should maybe not be inlined
 static inline uint16_t logUIntImmediate(uint32_t log_int){
 
