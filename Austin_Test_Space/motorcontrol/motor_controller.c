@@ -55,14 +55,14 @@ uint16_t rotation = 0;
 const float offset_120 = M_PI * 2 / 3;
 #define TRAPEZOID_MOTOR
 const float offset_240 = -M_PI * 2 / 3;
-static int HallLookup[8] = {
+static uint16_t HallLookup[8] = {
         0, // bad reading //0
-        5, // 1 Sector
-        3, // 2
-        4, // 3
-        1, // 4
-        6, // 5
-        2, // 6
+        2, // 1 Sector //2
+        4, // 2 //
+        3, // 3 //
+        6, // 4 //1//
+        1, // 5 //
+        5, // 6
         0  // bad reading //7
 };
 
@@ -379,8 +379,17 @@ float v_c;
 float id_e;
 float iq_e;
 static float angle = 0.0;
+int setup = 0;
 void sinusoidalControl(void){
-
+    if(GPIO_readPin(MotorEnableINV)==1){
+        //if the motor enable pin is high then the motor should NOT run
+        setup=0;
+        disablePWMPinsT();
+        return;
+    }else if(setup==0){
+        initMotor();
+        setup=1;
+    }
     //###############################
     //Read current measurements from the board sensors convert from adc values
     //###############################
@@ -610,6 +619,7 @@ char buf [27] = {' ',};
  */
 __interrupt void timer1ISR(void){
     //profile Current Conversion and Hall Effect
+    updateDriver();
 #ifdef 0
     static uint16_t ran = 0;
     if(!ran){
@@ -659,7 +669,7 @@ __interrupt void timer1ISR(void){
 //    screenDrawText(6*10, FONT_HEIGHT*2*5, buf, 0xFFFF, 0, 2);
 #endif
 #endif
-    //CPUTimer_reloadTimerCounter(CPUTIMER1_BASE);
+    CPUTimer_reloadTimerCounter(CPUTIMER1_BASE);
 }
 
 /**

@@ -143,27 +143,72 @@ static uint16_t HallLookup[8] = {
         2, // 1 Sector //2
         4, // 2 //
         3, // 3 //
-        1, // 4 //1//
-        6, // 5 //
+        6, // 4 //1//
+        1, // 5 //
         5, // 6
         0  // bad reading //7
 };
 
 //slow moving wheel
 float pwm_duty = 1000;
-uint32_t manual = 1;
+uint32_t manual = 7;
 uint32_t newhall =0;
 uint32_t hallread=0;
+float old_duty = 500;
+#define SAFECHANGE 20
 void updateDriver(void){
+    //we will have a Watchdog timer which allows for pwmduty to change even if the motor isn't moving
+    //write watchdog value
+
     if(GPIO_readPin(MotorEnableINV)==1){
         //if the motor enable pin is high then the motor should NOT run
         disablePWMPinsT();
         return;
     }
+
+
+    //get the value of the pwm_duty from the the throttle if it is enabled
+    float throttle_read = ADC_readResult(ADC_A_RESULT_BASE, ADC_A_THROTTLE_SAMPLE);
+
+    //clamp low side of throttle value to prevent drift from causing movement
+    if(throttle_read <600){
+        throttle_read=0;
+    }
+    //throttle_read=500;
+
+
+    //calculate the pwm_duty
+    pwm_duty = (throttle_read/2300.0f);
+    if(pwm_duty>1.0f){
+        pwm_duty=1.0f;
+    }
+    pwm_duty=pwm_duty*.94;
+    pwm_duty*=5000;
+    if(pwm_duty<0){
+        pwm_duty=0;
+    }
+    if(pwm_duty>4800){
+        pwm_duty=4800;
+    }
+    //don't let the duty change to quickly
+    if(pwm_duty>old_duty+SAFECHANGE){
+        old_duty=old_duty+SAFECHANGE;
+        pwm_duty=old_duty;
+    }else if (pwm_duty<old_duty-SAFECHANGE){
+        old_duty=old_duty-SAFECHANGE;
+        pwm_duty=old_duty;
+    }else{
+        old_duty=pwm_duty;
+    }
+
+
     //set the pwm rate of the phases
     EPWM_setCounterCompareValue(PHASE_A_EPWM_BASE, EPWM_COUNTER_COMPARE_A, pwm_duty);
     EPWM_setCounterCompareValue(PHASE_B_EPWM_BASE, EPWM_COUNTER_COMPARE_A, pwm_duty);
     EPWM_setCounterCompareValue(PHASE_C_EPWM_BASE, EPWM_COUNTER_COMPARE_A, pwm_duty);
+
+
+
     //start with a invalid value
     static uint32_t last_hall_val = 8;
     uint32_t hall_u = GPIO_readPin(HALL_EFFECT_U_GPIO);
@@ -184,74 +229,158 @@ void updateDriver(void){
     }
     hallread=hall_val;
     //toggle the pwm to properly drive
-    float delay =1;
+    //##############################################
+    //FORWARDS DRIVING CODE
+    //##############################################
+    float delay =2;
     switch(sector){
         case 1:
-            setTopA(GPIOMODE);
-            setTopC(GPIOMODE);
-            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
-            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
-            DEVICE_DELAY_US(delay);
-            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 1);
-            DEVICE_DELAY_US(delay);
-            setTopB(PWMMODE);
-            break;
-        case 2:
-            setTopA(GPIOMODE);
-            setTopC(GPIOMODE);
-            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
-            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
-            DEVICE_DELAY_US(delay);
-            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 1);
-            DEVICE_DELAY_US(delay);
-            setTopB(PWMMODE);
-            break;
-        case 3:
-            setTopA(GPIOMODE);
+            //swapped
             setTopB(GPIOMODE);
-            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
-            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
-            DEVICE_DELAY_US(delay);
-            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 1);
-            DEVICE_DELAY_US(delay);
-            setTopC(PWMMODE);
-            break;
-        case 4:
-            setTopA(GPIOMODE);
-            setTopB(GPIOMODE);
-            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
-            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+            setTopC(GPIOMODE);
             DEVICE_DELAY_US(delay);
             GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 1);
+            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
             DEVICE_DELAY_US(delay);
-            setTopC(PWMMODE);
+            setTopA(PWMMODE);
+            break;
+
+        case 2:
+            //swapped
+            setTopB(GPIOMODE);
+            setTopC(GPIOMODE);
+            DEVICE_DELAY_US(delay);
+            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 1);
+            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
+            DEVICE_DELAY_US(delay);
+            setTopA(PWMMODE);
+            break;
+
+        case 3:
+            //Swapped
+            setTopA(GPIOMODE);
+            setTopC(GPIOMODE);
+            DEVICE_DELAY_US(delay);
+            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 1);
+            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
+            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+            DEVICE_DELAY_US(delay);
+            setTopB(PWMMODE);
+            break;
+
+        case 4:
+            //swapped
+            setTopA(GPIOMODE);
+            setTopC(GPIOMODE);
+            DEVICE_DELAY_US(delay);
+            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 1);
+            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
+            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
+            DEVICE_DELAY_US(delay);
+            setTopB(PWMMODE);
             break;
         case 5:
+            //swapped
+            setTopA(GPIOMODE);
             setTopB(GPIOMODE);
-            setTopC(GPIOMODE);
-            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+            DEVICE_DELAY_US(delay);
+            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 1);
             GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
-            DEVICE_DELAY_US(delay);
-            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 1);
-            DEVICE_DELAY_US(delay);
-            setTopA(PWMMODE);
-            break;
-        case 6:
-            setTopB(GPIOMODE);
-            setTopC(GPIOMODE);
-            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
             GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
             DEVICE_DELAY_US(delay);
-            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 1);
-            DEVICE_DELAY_US(delay);
-            setTopA(PWMMODE);
+            setTopC(PWMMODE);
             break;
+        case 6:
+            //swapped
+            setTopA(GPIOMODE);
+            setTopB(GPIOMODE);
+            DEVICE_DELAY_US(delay);
+            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 1);
+            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
+            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+            DEVICE_DELAY_US(delay);
+            setTopC(PWMMODE);
+            break;
+
         default:
             //TODO NEED TO IMPLEMENT SOME SORT OF SAFE SHUTDOWN BEHAVIOR
             //an invalid state occurred shutdown the motor
             disablePWMPinsT();
             break;
     }
+    //##############################################
+    //BACKWARDS DRIVING CODE
+    //##############################################
+//    float delay =1;
+//    switch(sector){
+//        case 1:
+//            setTopA(GPIOMODE);
+//            setTopC(GPIOMODE);
+//            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
+//            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+//            DEVICE_DELAY_US(delay);
+//            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 1);
+//            DEVICE_DELAY_US(delay);
+//            setTopB(PWMMODE);
+//            break;
+//        case 2:
+//            setTopA(GPIOMODE);
+//            setTopC(GPIOMODE);
+//            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
+//            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
+//            DEVICE_DELAY_US(delay);
+//            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 1);
+//            DEVICE_DELAY_US(delay);
+//            setTopB(PWMMODE);
+//            break;
+//        case 3:
+//            setTopA(GPIOMODE);
+//            setTopB(GPIOMODE);
+//            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
+//            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
+//            DEVICE_DELAY_US(delay);
+//            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 1);
+//            DEVICE_DELAY_US(delay);
+//            setTopC(PWMMODE);
+//            break;
+//        case 4:
+//            setTopA(GPIOMODE);
+//            setTopB(GPIOMODE);
+//            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
+//            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+//            DEVICE_DELAY_US(delay);
+//            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 1);
+//            DEVICE_DELAY_US(delay);
+//            setTopC(PWMMODE);
+//            break;
+//        case 5:
+//            setTopB(GPIOMODE);
+//            setTopC(GPIOMODE);
+//            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+//            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 0);
+//            DEVICE_DELAY_US(delay);
+//            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 1);
+//            DEVICE_DELAY_US(delay);
+//            setTopA(PWMMODE);
+//            break;
+//        case 6:
+//            setTopB(GPIOMODE);
+//            setTopC(GPIOMODE);
+//            GPIO_writePin(PHASE_A_EPWM_EPWMB_GPIO, 0);
+//            GPIO_writePin(PHASE_B_EPWM_EPWMB_GPIO, 0);
+//            DEVICE_DELAY_US(delay);
+//            GPIO_writePin(PHASE_C_EPWM_EPWMB_GPIO, 1);
+//            DEVICE_DELAY_US(delay);
+//            setTopA(PWMMODE);
+//            break;
+//        default:
+//            //TODO NEED TO IMPLEMENT SOME SORT OF SAFE SHUTDOWN BEHAVIOR
+//            //an invalid state occurred shutdown the motor
+//            disablePWMPinsT();
+//            break;
+//    }
 
 }
 
