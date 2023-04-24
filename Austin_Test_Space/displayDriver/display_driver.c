@@ -303,7 +303,7 @@ int initDisplay(void)
 
     }
     ili9341_COLMODPixelFormatSet(0x55);
-    ili9341_memoryAccessControl(0x08);
+    ili9341_memoryAccessControl(0xC8);
     ili9341_displayOn();
     for (test = 0; test < 800000; test++)
     {

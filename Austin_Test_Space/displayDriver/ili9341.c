@@ -26,6 +26,9 @@ uint16_t hold[4];
 void init_ili9341(void)
 {
     SPI_disableFIFO(Ili9341_SPI_BASE);
+    GPIO_writePin(ILI9341_GPIO_RESET_PIN, 0);
+    DEVICE_DELAY_US(10000);
+    GPIO_writePin(ILI9341_GPIO_RESET_PIN, 1);
     initialized = 1;
 }
 

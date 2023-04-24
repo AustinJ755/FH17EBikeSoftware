@@ -54,7 +54,8 @@
 #include "./displayDriver/ili9341.h"
 #include "datalogger/datalogger.h"
 #include "displayDriver/display_driver.h"
-#include "./motorcontrol/motor_controller.h"
+#include "./motorcontrol/motor_driver.h"
+#include "./motorcontrol/sinusoidal_motor_control.h"
 //
 // Main
 //
@@ -83,7 +84,7 @@ void main(void)
     yi_iq[0] = 0.0;
     yi_iq[1] = 0.0;
 
-    ki_times_Tsby2 = ki*SampleTime/2.0;
+    //ki_times_Tsby2 = ki*SampleTime/2.0;
     //
     // Initialize device clock and peripherals
     //
@@ -129,7 +130,7 @@ void main(void)
     ERTM;
     //EPWM_init();
     initDisplay();
-    initMotor();
+    initializeMotor();
 
     cosf(test3);
 
@@ -159,7 +160,7 @@ void main(void)
 
     checkDebugMessageQueue();
     logString("Completed Initialization");
-//    drawFilledColorBox(0, 0, 239, 319, 0xD938);
+    drawFilledColorBox(0, 0, 239, 319, 0xD938);
 //    drawFilledColorBox(0, 0, 239, 319, 0x87f0);
 //    drawFilledColorBox(0, 0, 239, 319, 0xF800);
 //    drawFilledColorBox(10, 10, 10, 10, 0x87f0);
@@ -167,7 +168,7 @@ void main(void)
 //    drawFilledColorBox(100, 150, 10, 10, 0x87f0);
 //    drawFilledColorBox(300, 200, 10, 10, 0x87f0);
 //    checkDisplayCommandFifo();
-//    screenDrawText(50, 50, "hello\nworld\0", 0xD938, 0x87f0, 2);
+    screenDrawText(50, 50, "INIT\0", 0xD938, 0x87f0, 2);
 //    checkDisplayCommandFifo();
 //    drawOutlineBox(10, 10, 50, 50, 0x87f0, 5);
 //    checkDisplayCommandFifo();
@@ -188,3 +189,74 @@ void main(void)
 //
 // End of File
 //
+#include "./motorcontrol/sinusoidal_motor_control.h"
+#include "displayDriver/display_driver.h"
+
+char* ia_text = "Ia: ";
+char* ib_text = "Ib: ";
+char* ic_text = "Ic: ";
+char* a_est_text = "Angle: ";
+char* w_est_text = "Speed: ";
+char* id_text = "Id_e: ";
+char* iq_text = "Iq_e: ";
+char* va_text = "va: ";
+char* vb_text = "vb: ";
+char* vc_text = "vc: ";
+char* time_text  = "Time: ";
+char buf [27] = {' ',};
+#include "./ryu/ryu.h"
+#include "customtools/stringtools.h"
+__interrupt void timer1ISR(void){
+    //profile Current Conversion and Hall Effect
+    //updateDriver();
+#if 1
+    static uint16_t ran = 0;
+    if(!ran){
+        ran = 1;
+        //clear the screen
+        drawFilledColorBox(0, 0, 239, 319, 0);
+        //Log the three currents we read
+        screenDrawText(0, 0, ia_text, 0xFFFF, 0, 2);
+        screenDrawText(0, FONT_HEIGHT*2, ib_text, 0xFFFF, 0, 2);
+        screenDrawText(0, FONT_HEIGHT*2*2, ic_text, 0xFFFF, 0, 2);
+        //Log the angle and speed
+        screenDrawText(0, FONT_HEIGHT*2*3, a_est_text, 0xFFFF, 0, 2);
+        screenDrawText(0, FONT_HEIGHT*2*4, w_est_text, 0xFFFF, 0, 2);
+        //LOG the id/iq
+        screenDrawText(0, FONT_HEIGHT*2*5, id_text, 0xFFFF, 0, 2);
+        screenDrawText(0, FONT_HEIGHT*2*6, iq_text, 0xFFFF, 0, 2);
+
+        //log the 3 output set points
+        screenDrawText(0, FONT_HEIGHT*2*7, va_text, 0xFFFF, 0, 2);
+        screenDrawText(0, FONT_HEIGHT*2*8, vb_text, 0xFFFF, 0, 2);
+        screenDrawText(0, FONT_HEIGHT*2*9, vc_text, 0xFFFF, 0, 2);
+    }
+
+    buf[25]=' ';
+
+#ifdef 0//OPENLOOPTEST
+    screenDrawText(7*10,FONT_HEIGHT*2*3,_float_to_char(angle,buf),0xFFFF, 0, 2);
+#else
+    //log the 3 currents we read
+    screenDrawText(4*10,0,float2StringSimple(ia,buf),0xFFFF, 0, 2);
+    screenDrawText(4*10,FONT_HEIGHT*2,float2StringSimple(ib,buf),0xFFFF, 0, 2);
+    screenDrawText(4*10,FONT_HEIGHT*2*2,float2StringSimple(ic,buf),0xFFFF, 0, 2);
+
+    screenDrawText(8*10,FONT_HEIGHT*2*3,float2StringSimple(e_angle,buf),0xFFFF, 0, 2);
+    screenDrawText(8*10,FONT_HEIGHT*2*4,float2StringSimple(getMotorSpeed(),buf),0xFFFF, 0, 2);
+
+    //id and iq
+    screenDrawText(6*10,FONT_HEIGHT*2*5,float2StringSimple(err_id[1],buf),0xFFFF, 0, 2);
+    screenDrawText(6*10,FONT_HEIGHT*2*6,float2StringSimple(err_iq[1],buf),0xFFFF, 0, 2);
+
+    //log all 3 output voltages
+    screenDrawText(4*10,FONT_HEIGHT*2*7,float2StringSimple(v_a,buf),0xFFFF, 0, 2);
+    screenDrawText(4*10,FONT_HEIGHT*2*8,float2StringSimple(v_b,buf),0xFFFF, 0, 2);
+    screenDrawText(4*10,FONT_HEIGHT*2*9,float2StringSimple(v_c,buf),0xFFFF, 0, 2);
+
+//    float2StringComplex((float)v_c,buf);
+//    screenDrawText(6*10, FONT_HEIGHT*2*5, buf, 0xFFFF, 0, 2);
+#endif
+#endif
+    CPUTimer_reloadTimerCounter(CPUTIMER1_BASE);
+}

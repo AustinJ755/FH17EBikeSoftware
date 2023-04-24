@@ -66,26 +66,25 @@ const sysctl           = scripting.addModule("/driverlib/sysctl.js");
 /**
  * Write custom configuration values to the imported modules.
  */
-adc1.socHighPriorityMode            = "ADC_PRI_SOC0_HIPRI";
-adc1.soc0Trigger                    = "ADC_TRIGGER_EPWM1_SOCA";
-adc1.soc1Channel                    = "ADC_CH_ADCIN1";
-adc1.$name                          = "ADC_A";
-adc1.soc0Name                       = "PHASE_U_CURR_SAMPLE";
-adc1.soc1Name                       = "THROTTLE_SAMPLE";
-adc1.interruptPulseMode             = "ADC_PULSE_END_OF_CONV";
-adc1.enabledInts                    = ["ADC_INT_NUMBER1"];
-adc1.enableInterrupt1               = true;
-adc1.registerInterrupts             = ["1"];
-adc1.enableInterrupt1ContinuousMode = true;
-adc1.soc0UseSampleTimeCalculator    = true;
-adc1.soc0InputCapacitance           = 5;
-adc1.soc0InputResistance            = 100;
-adc1.soc0SampleWindow               = 4;
-adc1.soc1InterruptTrigger           = "ADC_INT_SOC_TRIGGER_ADCINT1";
-adc1.soc1SampleWindow               = 50;
-adc1.enabledSOCs                    = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1"];
-adc1.adcInt1.enableInterrupt        = true;
-adc1.adcInt1.interruptHandler       = "executePIControl";
+adc1.socHighPriorityMode         = "ADC_PRI_SOC0_HIPRI";
+adc1.soc0Trigger                 = "ADC_TRIGGER_EPWM1_SOCA";
+adc1.soc1Channel                 = "ADC_CH_ADCIN1";
+adc1.$name                       = "ADC_A";
+adc1.soc0Name                    = "PHASE_U_CURR_SAMPLE";
+adc1.soc1Name                    = "THROTTLE_SAMPLE";
+adc1.interruptPulseMode          = "ADC_PULSE_END_OF_CONV";
+adc1.enabledInts                 = ["ADC_INT_NUMBER1"];
+adc1.enableInterrupt1            = true;
+adc1.registerInterrupts          = ["1"];
+adc1.soc0UseSampleTimeCalculator = true;
+adc1.soc0InputCapacitance        = 5;
+adc1.soc0InputResistance         = 100;
+adc1.soc0SampleWindow            = 4;
+adc1.soc1SampleWindow            = 50;
+adc1.enabledSOCs                 = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1"];
+adc1.soc1Trigger                 = "ADC_TRIGGER_EPWM1_SOCA";
+adc1.adcInt1.enableInterrupt     = true;
+adc1.adcInt1.interruptHandler    = "pwmCountTrigger";
 
 adc2.adcBase              = "ADCB_BASE";
 adc2.$name                = "ADC_B";
@@ -311,7 +310,7 @@ scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EQEP2 Header
 
 gpio8.$name                      = "HALL_EFFECT_U_GPIO";
 gpio8.useInterrupt               = true;
-gpio8.qualMode                   = "GPIO_QUAL_ASYNC";
+gpio8.qualMode                   = "GPIO_QUAL_6SAMPLE";
 gpio8.gpioPin.$assign            = "boosterpack1.10";
 gpio8.xint.enableInt             = true;
 gpio8.xint.registerInterrupts    = true;
@@ -321,7 +320,7 @@ scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EQEP1 Header
 
 gpio9.$name                      = "HALL_EFFECT_V_GPIO";
 gpio9.useInterrupt               = true;
-gpio9.qualMode                   = "GPIO_QUAL_ASYNC";
+gpio9.qualMode                   = "GPIO_QUAL_6SAMPLE";
 gpio9.gpioPin.$assign            = "boosterpack1.9";
 gpio9.xint.xintNum               = "GPIO_INT_XINT2";
 gpio9.xint.intType               = "GPIO_INT_TYPE_BOTH_EDGES";
@@ -333,7 +332,7 @@ scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EQEP1 Header
 
 gpio10.$name                      = "HALL_EFFECT_W_GPIO";
 gpio10.useInterrupt               = true;
-gpio10.qualMode                   = "GPIO_QUAL_ASYNC";
+gpio10.qualMode                   = "GPIO_QUAL_6SAMPLE";
 gpio10.gpioPin.$assign            = "boosterpack1.11";
 gpio10.xint.intType               = "GPIO_INT_TYPE_BOTH_EDGES";
 gpio10.xint.enableInt             = true;
@@ -354,11 +353,13 @@ scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to FSI Header o
 gpio13.$name             = "ILI9341_GPIO_RESET_PIN";
 gpio13.direction         = "GPIO_DIR_MODE_OUT";
 gpio13.writeInitialValue = true;
+gpio13.initialValue      = 1;
 gpio13.gpioPin.$assign   = "boosterpack1.40";
 scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EPWM6 BP on the LaunchPad F280049C\\. Consider selecting it in 'use hardware' above\\. @@@.+?@@@", gpio13, "gpioPin");
 
 gpio14.$name           = "MotorEnableINV";
 gpio14.padConfig       = "PULLUP";
+gpio14.qualMode        = "GPIO_QUAL_3SAMPLE";
 gpio14.gpioPin.$assign = "boosterpack1.38";
 scripting.suppress("Connected to hardware,@@@.+?@@@ is connected to EPWM5 BP on the LaunchPad F280049C\\. Consider selecting it in 'use hardware' above\\. @@@.+?@@@", gpio14, "gpioPin");
 
